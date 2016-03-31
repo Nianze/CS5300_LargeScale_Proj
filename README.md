@@ -22,3 +22,10 @@ TODO Items:
 - IP tracking of a session (which IPs have information regarding a particular session)
 - Modify session version logic? (current logic is version++ upon every request and no storing info of old versions)
 - Garbage Collection logic of timeout sessions
+
+SSM Parameters:
+- N = 3 (3 total instances/nodes)
+- W = 3 (send write requests to 3 nodes (all instances))
+- WQ = 2 (wait for 2 instances to reply on write requests)
+- R = 2 (send read requests to 2 nodes containing the sesionID-sesionValue mapping)
+- wait for 1 reply on reads
