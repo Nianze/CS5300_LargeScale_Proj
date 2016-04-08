@@ -198,15 +198,6 @@ public class HomePage extends HttpServlet
 	        			expireTimestamp = sv.sessionExpiredTS;
 	        		}
 	        		callID++;
-        		
-	        		// create a session with new version
-        			// currently a naive way to create new session ID: using UUID
-        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
-	        		synchronized(Globals.hashtable)
-	        		{	        			
-	        			sessionID = UUID.randomUUID().toString();
-	        			Globals.hashtable.put(sessionID, sv);
-	        		}
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID+"_"+sv.sessionVersion+"_+_"+sv.locMetaData);
@@ -231,16 +222,7 @@ public class HomePage extends HttpServlet
 	        			message = sv.sessionMessage + " Network Version!!";
 	        			expireTimestamp = sv.sessionExpiredTS;
 	        		}
-	        		callID++;
-	        		
-	        		// create a session with new version
-        			// currently a naive way to create new session ID: using UUID
-        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
-	        		synchronized(Globals.hashtable)
-	        		{	        			
-	        			sessionID = UUID.randomUUID().toString();
-	        			Globals.hashtable.put(sessionID, sv);
-	        		}
+	        		callID++;	 
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)	        		
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID+"_"+sv.sessionVersion+"_+_"+sv.locMetaData);
