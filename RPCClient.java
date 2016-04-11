@@ -13,9 +13,9 @@ public class RPCClient
 	private ArrayList<InetAddress> requestAddress;
 	private final int portProj1bRPC = 5300;
 	private String[] locMetaData;  
-	private int R = 2;
-	private int W = 3;
-	private int WQ = 2;
+	private int R = 1;
+	private int W = 1;
+	private int WQ = 1;
 	
 	public RPCClient(ArrayList<InetAddress> list)
 	{
@@ -26,7 +26,11 @@ public class RPCClient
 		locMetaData = metaData.split("_");
 	}
 	
-	public RPCClient(){}
+	// for new users, randomly assign servers to store data
+	public RPCClient()
+	{
+		requestAddress = new ArrayList<InetAddress>();
+	}
 
 	public SessionValues sessionReadClient(String sessionID, Integer callID)
 	{
@@ -95,10 +99,24 @@ public class RPCClient
 			// randomly choose W instances to write new session
 			Random randomizer = new Random();
 			locMetaData = new String[W];
-			for(int j = 0; j < W; j++){				
-				locMetaData[j] = (String) Globals.ipAddressMapping.entrySet().toArray()[(randomizer.nextInt(Globals.ipAddressMapping.size()))];
-				requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[j])));
+			Object[] keys = Globals.ipAddressMapping.keySet().toArray();
+			//ArrayList<String> temp = new ArrayList<String>();
+			for(int j = 0; j < W; j++)
+			{
+				String randID = (String) keys[new Random().nextInt(keys.length)];
+				if (!Arrays.asList(locMetaData).contains(randID))
+				{
+					locMetaData[j] = (String) keys[new Random().nextInt(keys.length)];
+					requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[j])));
+				}
+				else
+				{
+					j--;
+				}
 			}
+			
+			System.out.println("requestAddress: " + requestAddress);
+			
 			StringBuilder builder = new StringBuilder();
 			// create new location MetaData in session value
 			for(String s : locMetaData) {
@@ -108,7 +126,7 @@ public class RPCClient
 			
 			DatagramSocket rpcSocket = new DatagramSocket();
 			Integer operationCode = 1;
-			String request = callID + "_" + operationCode + "_" + sessionID + "_" + newMessage + "_" + builder.toString();
+			String request = callID + "_" + operationCode + "_" + sessionID + "_" + newMessage + "_" + builder.toString() + "_" + "dummyParam";
 			byte[] outBuf = new byte[256];
 
 			System.out.println("Before Sending!!");
@@ -119,7 +137,6 @@ public class RPCClient
 				sendPkt.setData(request.getBytes());
 				rpcSocket.send(sendPkt);
 			}
-			System.out.println("After Sending!!");
 			
 			byte[] inBuf = new byte[256];
 			DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);

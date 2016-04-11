@@ -71,14 +71,21 @@ public class HomePage extends HttpServlet
 			// setup initial version
 			version = 0;
 			
-			// create a SessionValues Object and store it in to the hashmap
-			SessionValues sessionValue = new SessionValues(0, message, expireTimestamp);
-			Globals.hashtable.put(sessionID, sessionValue);
 			
-			// create a new cookie object (timeout set to 5 minutes)
-			Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID);
-			returnVisitorCookie.setMaxAge(60*5);
-			response.addCookie(returnVisitorCookie);
+    		RPCClient client = new RPCClient();
+    		SessionValues sv = client.sessionWriteClient(sessionID, message, callID);
+    		if(sv != null)
+    		{
+    			//version = sv.sessionVersion;
+    			//message = sv.sessionMessage + " Network Version!!";
+    			expireTimestamp = sv.sessionExpiredTS;
+    		}
+    		callID++;	 
+    		
+    		// create a new cookie object (timeout set to 5 minutes)	        		
+    		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID+"_"+sv.sessionVersion+"_+_"+sv.locMetaData);
+    		returnVisitorCookie.setMaxAge(60*5);
+    		response.addCookie(returnVisitorCookie);
 		} 
 		else 
 		{
@@ -288,9 +295,9 @@ public class HomePage extends HttpServlet
 					"Version: " + version + "<br><br>\n" +
 					"Date: " + currentTimestamp + "\n" +
 					"<H1>" + message + "</H1>\n" +
-					"<form action=\"/Project_1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnReplace\" type=\"submit\" value=\"Replace\"></form>\n" +
-					"<form action=\"/Project_1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Network Write\"></form>\n" +
-					"<form action=\"/Project_1b/home-page\" method=\"get\"><input name=\"btnRefresh\" type=\"submit\" value=\"Refresh\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"><br><br><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"></form>" +
+					"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnReplace\" type=\"submit\" value=\"Replace\"></form>\n" +
+					"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Network Write\"></form>\n" +
+					"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnRefresh\" type=\"submit\" value=\"Refresh\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"><br><br><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"></form>" +
 					"Cookie: " + sessionID + "<br><br>\n" +
 					"Expires: " + expireTimestamp + "\n" +
 					"</BODY></HTML>");
