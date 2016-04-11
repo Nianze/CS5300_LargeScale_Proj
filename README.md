@@ -37,3 +37,5 @@ To test and run the file:
 4) to debug the code and see print statements:
 - type in "sudo chmod 777 /var/log/tomcat8/catalina.out"
 - navigate to the catalina.out file and see the contents
+- test url: http://ip_address:8080/project-1b/home-page 
+
