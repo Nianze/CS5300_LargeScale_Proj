@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.UUID;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,11 +26,12 @@ public class RPCServerThread extends Thread
     {
     	try 
     	{
+    		//System.out.println("Server Starting!!!!!!!!!!!");
     		JSONParser parser = new JSONParser();
     		Object obj = parser.parse(new FileReader("/home/ec2-user/ipAddrInfo.txt"));
             JSONObject jsonObject = (JSONObject) obj;
             JSONArray itemList = (JSONArray) jsonObject.get("Items");
-            int length = itemList.size();
+            int length = itemList.size() ;
             for(int i=0; i<length; i++)
             {
             	JSONObject json = (JSONObject)itemList.get(i);
@@ -70,6 +72,10 @@ public class RPCServerThread extends Thread
 						{
 							sv.sessionExpiredTS = expireTimestamp;
 							sv.sessionVersion += 1;
+		        			// currently a naive way to create new session ID: using UUID
+		        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
+							sessionID = UUID.randomUUID().toString();
+							Globals.hashtable.put(sessionID, sv);
 							reply = callID + "_" + sessionID + "_" + sv.sessionVersion + "_" + sv.sessionMessage + "_" + sv.sessionExpiredTS + "_" + "dummyParam";
 						}
 						break;
@@ -77,19 +83,28 @@ public class RPCServerThread extends Thread
 					case 1: //sessionWrite operation
 					{
 						String newMessage = parts[3];
+						String metaData = parts[4];
 						if(sv!= null)
 						{
 							sv.sessionMessage = newMessage;
 							sv.sessionVersion += 1;
 							sv.sessionExpiredTS = expireTimestamp;
+							sv.locMetaData = metaData;
+		        			// currently a naive way to create new session ID: using UUID
+		        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
+							sessionID = UUID.randomUUID().toString();
 							Globals.hashtable.put(sessionID, sv);
 						}
 						else
 						{
 							sv = new SessionValues(0, newMessage, expireTimestamp);
+							sv.locMetaData = metaData;
+		        			// currently a naive way to create new session ID: using UUID
+		        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
+							sessionID = UUID.randomUUID().toString();
 							Globals.hashtable.put(sessionID, sv);
 						}
-						reply = callID + "_" + sessionID + "_" + sv.sessionVersion + "_" + sv.sessionMessage + "_" + sv.sessionExpiredTS + "_" + "dummyParam";;
+						reply = callID + "_" + sessionID + "_" + sv.sessionVersion + "_" + sv.sessionMessage + "_" + sv.sessionExpiredTS + "_" + sv.locMetaData;
 						break;
 					}
 					default:
