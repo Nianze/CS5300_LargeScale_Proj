@@ -29,3 +29,11 @@ SSM Parameters:
 - WQ = 2 (wait for 2 instances to reply on write requests)
 - R = 2 (send read requests to 2 nodes containing the sesionID-sesionValue mapping)
 - wait for 1 reply on reads
+
+To test and run the file:
+1) export code into WAR file <br>
+2) ssh and copy the WAR file into var/lib/tomcat8/webapps <br>
+3) ssh into the instance and start or restart the server using "sudo service tomcat8 start"<br>
+4) to debug the code and see print statements:
+- type in "sudo chmod 777 /var/log/tomcat8/catalina.out"
+- navigate to the catalina.out file and see the contents
