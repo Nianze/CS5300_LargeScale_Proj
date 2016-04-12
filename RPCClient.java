@@ -24,6 +24,7 @@ public class RPCClient
 	
 	public RPCClient(String metaData) throws UnknownHostException{
 		locMetaData = metaData.split("_");
+		requestAddress = new ArrayList<InetAddress>();
 	}
 	
 	// for new users, randomly assign servers to store data
@@ -32,23 +33,22 @@ public class RPCClient
 		requestAddress = new ArrayList<InetAddress>();
 	}
 
-	public SessionValues sessionReadClient(String sessionID, Integer callID)
+	public SessionValues sessionReadClient(String sessionIDWithVersion, Integer callID)
 	{
 		try 
 		{
 			DatagramSocket rpcSocket = new DatagramSocket();
 			Integer operationCode = 0;
-			String request = callID + "_" + operationCode + "_" + sessionID + "_" + "dummyParam";
+			String request = callID + "_" + operationCode + "_" + sessionIDWithVersion + "_" + "dummyParam";
 			byte[] outBuf = new byte[256];
-			for(int i = 0; i < R; i++){
-				// get R instances which has stored sessoin_value				
-				requestAddress = new ArrayList<InetAddress>();				
-				for(int j = 0; j < locMetaData.length; j++){
-					requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[j])));
-				}
-				// get random R instances' ip address 
-				Random randomizer = new Random();
-				InetAddress addr = requestAddress.get(randomizer.nextInt(requestAddress.size()));
+			
+			// select the first R address in metadata and store the IPs in requestAddress
+			for(int i = 0; i < R; i++)
+				requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[i])));
+			
+			for(int i = 0; i < requestAddress.size(); i++)
+			{
+				InetAddress addr = requestAddress.get(i);
 				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, addr, portProj1bRPC);
 				sendPkt.setData(request.getBytes());
 				rpcSocket.send(sendPkt);
@@ -71,11 +71,14 @@ public class RPCClient
 				returnSessionID = parts[1];
 				version = Integer.parseInt(parts[2]);
 				message = parts[3];
-				expiredTS = parts[4];				
+				expiredTS = parts[4];			
 			} while(replyCallID != callID);
 			
 			rpcSocket.close();
-			return new SessionValues(version, message, expiredTS);
+			
+			SessionValues sv = new SessionValues(version, message, expiredTS);
+			sv.returnSessionID = returnSessionID;
+			return sv;
 		}
 		catch (SocketException e) 
 		{
@@ -92,15 +95,13 @@ public class RPCClient
 	
 	// TODO: need to fix this to match the SSM protocol
 	// Right now, send to all servers and wait for one reply (just like a read)
-	public SessionValues sessionWriteClient(String sessionID, String newMessage, Integer callID)
+	public SessionValues sessionWriteClient(String sessionIDWithVersion, String newMessage, Integer callID)
 	{
 		try 
 		{
-			// randomly choose W instances to write new session
-			Random randomizer = new Random();
+			// randomly choose W ip address instances to write new session (add those ip into requestAddress)
 			locMetaData = new String[W];
 			Object[] keys = Globals.ipAddressMapping.keySet().toArray();
-			//ArrayList<String> temp = new ArrayList<String>();
 			for(int j = 0; j < W; j++)
 			{
 				String randID = (String) keys[new Random().nextInt(keys.length)];
@@ -115,24 +116,25 @@ public class RPCClient
 				}
 			}
 			
-			System.out.println("requestAddress: " + requestAddress);
+			//System.out.println("requestAddress: " + requestAddress);
 			
 			StringBuilder builder = new StringBuilder();
-			// create new location MetaData in session value
-			for(String s : locMetaData) {
+			for(String s : locMetaData) 
+			{
 			    builder.append(s);
 			    builder.append("_");
 			}
 			
 			DatagramSocket rpcSocket = new DatagramSocket();
 			Integer operationCode = 1;
-			String request = callID + "_" + operationCode + "_" + sessionID + "_" + newMessage + "_" + builder.toString() + "_" + "dummyParam";
+			String request = callID + "_" + operationCode + "_" + sessionIDWithVersion + "_" + newMessage + "_" + builder.toString() + "dummyParam";
 			byte[] outBuf = new byte[256];
 
-			System.out.println("Before Sending!!");
-			for(int i = 0; i < WQ; i++){
+			// send to all addresses in requestAddress
+			for(int i = 0; i < requestAddress.size(); i++)
+			{
 				// get random WQ instances' ip address 				
-				InetAddress addr = requestAddress.get(randomizer.nextInt(requestAddress.size()));
+				InetAddress addr = requestAddress.get(i);
 				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, addr, portProj1bRPC);
 				sendPkt.setData(request.getBytes());
 				rpcSocket.send(sendPkt);
@@ -164,6 +166,7 @@ public class RPCClient
 			
 			SessionValues sv = new SessionValues(version, message, expiredTS);
 			sv.locMetaData = builder.toString();
+			sv.returnSessionID = returnSessionID;
 			return sv;
 		}
 		catch (SocketException e) 

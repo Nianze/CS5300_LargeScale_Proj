@@ -19,6 +19,7 @@ public class HomePage extends HttpServlet
 	private static final long serialVersionUID = -829543884406545493L;
 	private String message = "";
 	private String sessionID = "";
+	private String cookieValue = "";
 	private Integer version = 0;
 	private String currentTimestamp = "";
 	private String expireTimestamp = "";
@@ -39,8 +40,8 @@ public class HomePage extends HttpServlet
 			{
 				if (c.getName().equals("CS5300PROJ1SESSION")) 
 				{
-					// check this user has not logged out
-					if(Globals.hashtable.containsKey(c.getValue()))
+					String[] parts = c.getValue().split("_");
+					if(Globals.hashtable.containsKey(parts[0]))
 					{
 						newbie = false;
 						cookie = c;
@@ -56,6 +57,8 @@ public class HomePage extends HttpServlet
 		
 		if (newbie) 
 		{
+			System.out.println("For NEWBIE!!");
+			
 			// create a new session ID
 			sessionID = UUID.randomUUID().toString();
 			
@@ -69,27 +72,27 @@ public class HomePage extends HttpServlet
 			message = "Hello User";
 			
 			// setup initial version
-			version = 0;
-			
+			version = 1;
 			
     		RPCClient client = new RPCClient();
-    		SessionValues sv = client.sessionWriteClient(sessionID, message, callID);
+    		SessionValues sv = client.sessionWriteClient(sessionID + "_0", message, callID);
     		if(sv != null)
     		{
-    			//version = sv.sessionVersion;
-    			//message = sv.sessionMessage + " Network Version!!";
     			expireTimestamp = sv.sessionExpiredTS;
+    			sessionID = sv.returnSessionID;
     		}
     		callID++;	 
     		
+    		cookieValue = sessionID + "_" + sv.sessionVersion + "," + sv.locMetaData + "dummyParam";
+    		
     		// create a new cookie object (timeout set to 5 minutes)	        		
-    		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID+"_"+sv.sessionVersion+"_+_"+sv.locMetaData);
+    		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
     		returnVisitorCookie.setMaxAge(60*5);
     		response.addCookie(returnVisitorCookie);
 		} 
 		else 
 		{
-	        if (request.getParameter("btnRefresh") != null) // refresh button clicked
+	        /*if (request.getParameter("btnRefresh") != null) // refresh button clicked
 	        {
 	        	if(cookie != null)
 	        	{
@@ -131,8 +134,8 @@ public class HomePage extends HttpServlet
 					returnVisitorCookie.setMaxAge(60*5);
 					response.addCookie(returnVisitorCookie);
 	        	}
-	        }
-	        else if (request.getParameter("btnLogout") != null) // logout button clicked
+	        }*/
+	        if (request.getParameter("btnLogout") != null) // logout button clicked
 	        {
 	        	if(cookie != null)
 	        	{
@@ -146,7 +149,7 @@ public class HomePage extends HttpServlet
 	        		regularPage = false;
 	        	}
 	        }
-	        else if (request.getParameter("btnReplace") != null) // replace button clicked
+	        /*else if (request.getParameter("btnReplace") != null) // replace button clicked
 	        {
 	        	message = request.getParameter("cookieMessage");
 	        	if (cookie != null && message != null) // replace the message
@@ -187,27 +190,34 @@ public class HomePage extends HttpServlet
 					returnVisitorCookie.setMaxAge(60*5);
 					response.addCookie(returnVisitorCookie);
 	        	}
-	        }
+	        }*/
 	        else if(request.getParameter("btnNetworkRead") != null)
 	        {
 	        	if (cookie != null)
 	        	{
 	        		// get the sessionID from the cookie
 	        		sessionID = cookie.getValue();
+	        		
+	        		System.out.println("Received Cookie Value: " + sessionID);
+	        		
 	        		// get the locatoin metaData
-	        		String[] parts = sessionID.split("_+_");
+	        		String[] parts = sessionID.split(",");
 	        		RPCClient client = new RPCClient(parts[1]);
-	        		SessionValues sv = client.sessionReadClient(sessionID, callID); // version add 1 inside sessionReadClient()
+	        		SessionValues sv = client.sessionReadClient(parts[0], callID);
+	        		sv.locMetaData = parts[1];
 	        		if(sv != null)
 	        		{
 	        			version = sv.sessionVersion;
 	        			message = sv.sessionMessage + " Network Version!!";
+	        			sessionID = sv.returnSessionID;
 	        			expireTimestamp = sv.sessionExpiredTS;
 	        		}
 	        		callID++;
 	        		
+	        		cookieValue = sessionID + "_" + sv.sessionVersion + "," + sv.locMetaData;
+	        		
 	        		// create a new cookie object (timeout set to 5 minutes)
-	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID+"_"+sv.sessionVersion+"_+_"+sv.locMetaData);
+	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
 	        	}
@@ -219,20 +229,26 @@ public class HomePage extends HttpServlet
 	        	{
 	        		// get the sessionID from the cookie
 	        		sessionID = cookie.getValue();
+	        		
+	        		System.out.println("Received Cookie Value: " + sessionID);
+	        		
 	        		// get the locatoin metaData
-	        		String[] parts = sessionID.split("_+_");
+	        		String[] parts = sessionID.split(",");
 	        		RPCClient client = new RPCClient(parts[1]);
-	        		SessionValues sv = client.sessionWriteClient(sessionID, message, callID);
+	        		SessionValues sv = client.sessionWriteClient(parts[0], message, callID);
 	        		if(sv != null)
 	        		{
 	        			version = sv.sessionVersion;
 	        			message = sv.sessionMessage + " Network Version!!";
+	        			sessionID = sv.returnSessionID;
 	        			expireTimestamp = sv.sessionExpiredTS;
 	        		}
-	        		callID++;	 
+	        		callID++;
+	        		
+	        		cookieValue = sessionID + "_" + sv.sessionVersion + "," + sv.locMetaData + "dummyParam";
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)	        		
-	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID+"_"+sv.sessionVersion+"_+_"+sv.locMetaData);
+	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
 	        	}
@@ -241,43 +257,31 @@ public class HomePage extends HttpServlet
 	        {
 	        	if (cookie != null)
 	        	{
-	        		// setup response timestamps and extend the existing timestamp
-	    			Date now = new Date(System.currentTimeMillis());
-	    			Date expired = new Date(System.currentTimeMillis()+5*60*1000);
-	    			currentTimestamp = sdf.format(now);
-	    			expireTimestamp = sdf.format(expired);
-	        		
 	        		// get the sessionID from the cookie
 	        		sessionID = cookie.getValue();
 	        		
-	        		// retrieve the SessionValue object associated with the sessionID and update the values
-	        		SessionValues sessionValue = null;
-	        		synchronized(Globals.hashtable)
+	        		System.out.println("Received Cookie Value: " + sessionID);
+	        		
+	        		// get the locatoin metaData
+	        		String[] parts = sessionID.split(",");
+	        		RPCClient client = new RPCClient(parts[1]);
+	        		SessionValues sv = client.sessionReadClient(parts[0], callID);
+	        		sv.locMetaData = parts[1];
+	        		if(sv != null)
 	        		{
-	        			sessionValue = Globals.hashtable.get(sessionID);
-	        			sessionValue.sessionVersion += 1;
-	        			sessionValue.sessionExpiredTS = expireTimestamp;
-	        			Globals.hashtable.put(sessionID, sessionValue);
+	        			version = sv.sessionVersion;
+	        			message = sv.sessionMessage + " Network Version!!";
+	        			sessionID = sv.returnSessionID;
+	        			expireTimestamp = sv.sessionExpiredTS;
 	        		}
-					
-	        		if (sessionValue != null)
-	        		{
-	        			// setup response version number
-	        			version = sessionValue.sessionVersion;
-				
-	        			// setup response message
-	        			message = sessionValue.sessionMessage;
-	        		}
-	        		else // error handling in case of null pointer
-	        		{
-	        			version = 0;
-	        			message = "Hello User";
-	        		}
-					
-					// create a new cookie object (timeout set to 5 minutes)
-					Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID);
-					returnVisitorCookie.setMaxAge(60*5);
-					response.addCookie(returnVisitorCookie);
+	        		callID++;
+	        		
+	        		cookieValue = sessionID + "_" + sv.sessionVersion + "," + sv.locMetaData;
+	        		
+	        		// create a new cookie object (timeout set to 5 minutes)
+	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
+	        		returnVisitorCookie.setMaxAge(60*5);
+	        		response.addCookie(returnVisitorCookie);
 	        	}
 	        }
 		}
@@ -289,16 +293,17 @@ public class HomePage extends HttpServlet
 		{
 			out.println(docType +
 					"<HTML>\n" +
-					"<HEAD><TITLE>CS 5300 Project 1a</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
+					"<HEAD><TITLE>CS 5300 Project 1b</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
 					"NetID: ah935<br><br>\n" +
 					"Session: " + sessionID + "<br><br>\n" +
 					"Version: " + version + "<br><br>\n" +
 					"Date: " + currentTimestamp + "\n" +
 					"<H1>" + message + "</H1>\n" +
-					"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnReplace\" type=\"submit\" value=\"Replace\"></form>\n" +
+					//"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnReplace\" type=\"submit\" value=\"Replace\"></form>\n" +
 					"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Network Write\"></form>\n" +
-					"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnRefresh\" type=\"submit\" value=\"Refresh\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"><br><br><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"></form>" +
-					"Cookie: " + sessionID + "<br><br>\n" +
+					"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"></form>" +
+					//"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnRefresh\" type=\"submit\" value=\"Refresh\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"><br><br><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"></form>" +
+					"Cookie: " + cookieValue + "<br><br>\n" +
 					"Expires: " + expireTimestamp + "\n" +
 					"</BODY></HTML>");
 		}
@@ -306,7 +311,7 @@ public class HomePage extends HttpServlet
 		{
 			out.println(docType +
 					"<HTML>\n" +
-					"<HEAD><TITLE>CS 5300 Project 1a</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
+					"<HEAD><TITLE>CS 5300 Project 1b</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
 					"<H1>You have logged out. Thank you for using this website!</H1>\n" +
 					"<form action=\"/Project_1b/home-page\" method=\"get\"><input name=\"btnReload\" type=\"submit\" value=\"Reload the Website\"></form>" +
 					"</BODY></HTML>");

@@ -25,11 +25,11 @@ public class RPCServer implements ServletContextListener
             myThread.start();
         }
         
-        Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new checkExpire(), 0, this.checkInterval*1000);
+        //Timer timer = new Timer();
+        //timer.scheduleAtFixedRate(new checkExpire(), 0, this.checkInterval*1000);
     }
     
-    class checkExpire extends TimerTask{
+    /*class checkExpire extends TimerTask{
     	public SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss a");
     	public void run(){
     		Set<String> ids = Globals.hashtable.keySet();
@@ -67,7 +67,7 @@ public class RPCServer implements ServletContextListener
     		return false;
     	}
     	
-    }
+    }*/
 
     public void contextDestroyed(ServletContextEvent sce)
     {
