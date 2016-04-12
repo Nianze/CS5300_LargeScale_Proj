@@ -87,6 +87,8 @@ public class HomePage extends HttpServlet
     		
     		// create a new cookie object (timeout set to 5 minutes)	        		
     		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
+    		returnVisitorCookie.setDomain(".wl553.bigdata.systems");
+    		returnVisitorCookie.setPath("/");
     		returnVisitorCookie.setMaxAge(60*5);
     		response.addCookie(returnVisitorCookie);
 		} 
@@ -249,6 +251,8 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)	        		
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
+	        		returnVisitorCookie.setDomain(".wl553.bigdata.systems");
+	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
 	        	}
@@ -280,6 +284,8 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
+	        		returnVisitorCookie.setDomain(".wl553.bigdata.systems");
+	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
 	        	}
@@ -313,7 +319,7 @@ public class HomePage extends HttpServlet
 					"<HTML>\n" +
 					"<HEAD><TITLE>CS 5300 Project 1b</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
 					"<H1>You have logged out. Thank you for using this website!</H1>\n" +
-					"<form action=\"/Project_1b/home-page\" method=\"get\"><input name=\"btnReload\" type=\"submit\" value=\"Reload the Website\"></form>" +
+					"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnReload\" type=\"submit\" value=\"Reload the Website\"></form>" +
 					"</BODY></HTML>");
 		}
 		
