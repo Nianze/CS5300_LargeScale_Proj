@@ -102,9 +102,9 @@ public class RPCClient
 			// randomly choose W ip address instances to write new session (add those ip into requestAddress)
 			ArrayList<String> copy = new ArrayList<String>(Globals.ipAddressMapping.keySet());
 			Collections.shuffle(copy);
-			Object[] newcopy = copy.subList(0, W).toArray();
+			String[] locMetaData = new String[W];
 			for(int i = 0; i < W; i++){
-				locMetaData[i] = (String) newcopy[i]; 
+				locMetaData[i] = copy.get(i); 
 				requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[i])));
 			}
 			
