@@ -13,9 +13,9 @@ public class RPCClient
 	private ArrayList<InetAddress> requestAddress;
 	private final int portProj1bRPC = 5300;
 	private String[] locMetaData;  
-	private int R = 1;
-	private int W = 1;
-	private int WQ = 1;
+	private int R = 2;
+	private int W = 3;
+	private int WQ = 2;
 	
 	public RPCClient(ArrayList<InetAddress> list)
 	{
@@ -100,23 +100,28 @@ public class RPCClient
 		try 
 		{
 			// randomly choose W ip address instances to write new session (add those ip into requestAddress)
-			locMetaData = new String[W];
-			Object[] keys = Globals.ipAddressMapping.keySet().toArray();
-			for(int j = 0; j < W; j++)
-			{
-				String randID = (String) keys[new Random().nextInt(keys.length)];
-				if (!Arrays.asList(locMetaData).contains(randID))
-				{
-					locMetaData[j] = (String) keys[new Random().nextInt(keys.length)];
-					requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[j])));
-				}
-				else
-				{
-					j--;
-				}
+			ArrayList<String> copy = new ArrayList<String>(Globals.ipAddressMapping.keySet());
+			Collections.shuffle(copy);
+			Object[] newcopy = copy.subList(0, W).toArray();
+			for(int i = 0; i < W; i++){
+				locMetaData[i] = (String) newcopy[i]; 
+				requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[i])));
 			}
 			
-			//System.out.println("requestAddress: " + requestAddress);
+//			Object[] keys = Globals.ipAddressMapping.keySet().toArray();
+//			for(int j = 0; j < W; j++)
+//			{
+//				String randID = (String) keys[new Random().nextInt(keys.length)];
+//				if (!Arrays.asList(locMetaData).contains(randID))
+//				{
+//					locMetaData[j] = (String) keys[new Random().nextInt(keys.length)];
+//					requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[j])));
+//				}
+//				else
+//				{
+//					j--;
+//				}
+//			}
 			
 			StringBuilder builder = new StringBuilder();
 			for(String s : locMetaData) 
