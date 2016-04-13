@@ -41,12 +41,9 @@ SSM Parameters:
 To test and run the file:
 
 1. export code into WAR file
-
 2. ssh and copy the WAR file into var/lib/tomcat8/webapps
   * may need to do "sudo chmod 777 /var/lib/tomcat8/webapps" in terminal firstly
-
 3. ssh into the instance and start or restart the server using "sudo service tomcat8 start"<br>
-
 4. to debug the code and see print statements: <br>
   * type in "sudo chmod 777 /var/log/tomcat8/catalina.out"
   * navigate to the catalina.out file and see the contents
