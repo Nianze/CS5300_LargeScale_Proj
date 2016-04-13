@@ -10,6 +10,7 @@ public class Globals
 	public static final int W = 3;
 	public static final int WQ = 2;
 	public static final String cookieDomain = ".ah935.bigdata.systems";
+	public static String currentServerID = "";
 	
 	static
 	{

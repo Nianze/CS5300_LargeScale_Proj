@@ -243,8 +243,9 @@ public class HomePage extends HttpServlet
 			"NetID: ah935, nl443, wl533<br><br>\n" +
 			"Session: " + sessionID + "<br><br>\n" +
 			"Version: " + version + "<br><br>\n" +
-			"Read From Server ID: " + readServerID + "<br><br>\n" +
-			"Write To Server ID: " + writeServerID + "<br><br>\n" +
+			"You are currently on server ID: " + Globals.currentServerID + "<br><br>\n" +
+			"Getting Read From Server ID: " + readServerID + "<br><br>\n" +
+			"Sending Write To Server IDs: " + writeServerID + "<br><br>\n" +
 			"Cookie Domain: " + Globals.cookieDomain + "<br><br>\n" +
 			"Date: " + currentTimestamp + "\n" +
 			"<H1>" + message + "</H1>\n" +

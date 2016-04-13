@@ -5,6 +5,8 @@ yum -y remove java-1.7.0-openjdk
 yum -y install java-1.8.0
 yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps
 
+cd /home/ec2-user
+
 # get the ip and ami index info of this instance
 wget http://169.254.169.254/latest/meta-data/local-ipv4
 wget http://169.254.169.254/latest/meta-data/ami-launch-index

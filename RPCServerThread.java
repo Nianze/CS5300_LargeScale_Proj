@@ -1,5 +1,6 @@
 package sessionManagement;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -26,6 +27,15 @@ public class RPCServerThread extends Thread
     {
     	try 
     	{
+    		// parse the ami-launch-index file to get the serverID
+    		BufferedReader br = new BufferedReader(new FileReader("/home/ec2-user/ami-launch-index"));
+    		if(br != null)
+    		{
+    			Globals.currentServerID = br.readLine();
+    			br.close();
+    		}
+    		
+    		// parse the IP address file and load the mapping into memory
     		JSONParser parser = new JSONParser();
     		Object obj = parser.parse(new FileReader("/home/ec2-user/ipAddrInfo.txt"));
             JSONObject jsonObject = (JSONObject) obj;
