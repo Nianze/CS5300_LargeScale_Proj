@@ -17,11 +17,19 @@ Completed Items:
 - Basic RPC Client & Server (send to all IPs in table and wait for 1 reply)
 
 TODO Items:
-- Modify RPC Client & Server with proper parameters according to the SSM paper
-- Periodic update of the server IP table to reflect other server up/down changes
-- IP tracking of a session (which IPs have information regarding a particular session)
-- Modify session version logic? (current logic is version++ upon every request and no storing info of old versions)
+- ~~Modify RPC Client & Server with proper parameters according to the SSM paper~~
+- ~~Periodic update of the server IP table to reflect other server up/down changes~~
+- ~~IP tracking of a session (which IPs have information regarding a particular session)~~
+- ~~Modify session version logic? (current logic is version++ upon every request and no storing info of old versions)~~
 - Garbage Collection logic of timeout sessions
+* The SvrID and reboot_num of the server executing the client request
+  * Inet4Address.getLocalHost().getHostAddress() + ipAddressMapping --> serverid
+  * reboot.sh:
+      1. increase the reboot_num in /home/ec2-user/reboot_num.txt
+      2. sudo service tomcat8 start
+* Report the SvrID where the session data was found
+* Local meta data of WQ servers
+* Cookie domain: xxx.bigdata.systems
 
 SSM Parameters:
 - N = 3 (3 total instances/nodes)
@@ -31,7 +39,6 @@ SSM Parameters:
 - wait for 1 reply on reads
 
 To test and run the file: <br>
-
 1. export code into WAR file
 2. ssh and copy the WAR file into var/lib/tomcat8/webapps
  * may need to do "sudo chmod 777 /var/lib/tomcat8/webapps" in terminal firstly
