@@ -31,7 +31,6 @@ public class HomePage extends HttpServlet
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
 	{
 		boolean newbie = true;
-		boolean regularPage = true;
 		Cookie[] cookies = request.getCookies();
 		Cookie cookie = null;
 		if (cookies != null) 
@@ -40,20 +39,15 @@ public class HomePage extends HttpServlet
 			{
 				if (c.getName().equals("CS5300PROJ1SESSION")) 
 				{
-					String[] parts = c.getValue().split("_");
-					if(Globals.hashtable.containsKey(parts[0]))
-					{
-						newbie = false;
-						cookie = c;
-						break;
-					}
-					else
-					{
-						break;
-					}
+					newbie = false;
+					cookie = c;
+					break;
 				}
 			}
 		}
+		
+		Date now = new Date(System.currentTimeMillis());
+		currentTimestamp = sdf.format(now);
 		
 		if (newbie) 
 		{
@@ -62,10 +56,8 @@ public class HomePage extends HttpServlet
 			// create a new session ID
 			sessionID = UUID.randomUUID().toString();
 			
-			// get current timestamp and calculate the cookie expire timestamp
-			Date now = new Date(System.currentTimeMillis());
+			// calculate the cookie expire timestamp
 			Date expired = new Date(System.currentTimeMillis()+5*60*1000);
-			currentTimestamp = sdf.format(now);
 			expireTimestamp = sdf.format(expired);
 			
 			// setup initial message
@@ -87,112 +79,48 @@ public class HomePage extends HttpServlet
     		
     		// create a new cookie object (timeout set to 5 minutes)	        		
     		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-    		returnVisitorCookie.setDomain(".wl553.bigdata.systems");
+    		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
     		returnVisitorCookie.setPath("/");
     		returnVisitorCookie.setMaxAge(60*5);
     		response.addCookie(returnVisitorCookie);
 		} 
 		else 
 		{
-	        /*if (request.getParameter("btnRefresh") != null) // refresh button clicked
-	        {
-	        	if(cookie != null)
-	        	{
-	        		// setup response timestamps and extend the existing timestamp
-	    			Date now = new Date(System.currentTimeMillis());
-	    			Date expired = new Date(System.currentTimeMillis()+5*60*1000);
-	    			currentTimestamp = sdf.format(now);
-	    			expireTimestamp = sdf.format(expired);
-	        		
-	        		// get the sessionID from the cookie
-	        		sessionID = cookie.getValue();
-	        		
-	        		// retrieve the SessionValue object associated with the sessionID and update the values
-	        		SessionValues sessionValue = null;
-	        		synchronized(Globals.hashtable)
-	        		{
-	        			sessionValue = Globals.hashtable.get(sessionID);
-	        			sessionValue.sessionVersion += 1;
-	        			sessionValue.sessionExpiredTS = expireTimestamp;
-	        			Globals.hashtable.put(sessionID, sessionValue);
-	        		}
-					
-	        		if (sessionValue != null)
-	        		{
-	        			// setup response version number
-	        			version = sessionValue.sessionVersion;
-				
-	        			// setup response message
-	        			message = sessionValue.sessionMessage;
-	        		}
-	        		else // error handling in case of null pointer
-	        		{
-	        			version = 0;
-	        			message = "Hello User";
-	        		}
-					
-					// create a new cookie object (timeout set to 5 minutes)
-					Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID);
-					returnVisitorCookie.setMaxAge(60*5);
-					response.addCookie(returnVisitorCookie);
-	        	}
-	        }*/
 	        if (request.getParameter("btnLogout") != null) // logout button clicked
 	        {
-	        	if(cookie != null)
-	        	{
-	        		// get the sessionID from the cookie
-	        		sessionID = cookie.getValue();
-	        		
-	        		// delete the Session Value Object associated with this sessionID
-	        		Globals.hashtable.remove(sessionID);
-	        		
-	        		// set the return page flag to false to return a special logout page
-	        		regularPage = false;
-	        	}
-	        }
-	        /*else if (request.getParameter("btnReplace") != null) // replace button clicked
-	        {
-	        	message = request.getParameter("cookieMessage");
-	        	if (cookie != null && message != null) // replace the message
-	        	{
-	        		// setup response timestamps and extend the existing timestamp
-	    			Date now = new Date(System.currentTimeMillis());
-	    			Date expired = new Date(System.currentTimeMillis()+5*60*1000);
-	    			currentTimestamp = sdf.format(now);
-	    			expireTimestamp = sdf.format(expired);
-	        		
-	        		sessionID = cookie.getValue();
-	        		SessionValues sessionValue = null;
-	        		synchronized(Globals.hashtable)
-	        		{
-	        			sessionValue = Globals.hashtable.get(sessionID);
-		        		sessionValue.sessionMessage = message;
-						sessionValue.sessionVersion += 1;
-						sessionValue.sessionExpiredTS = expireTimestamp;
-						Globals.hashtable.put(sessionID, sessionValue);
-	        		}
-	        		
-	        		if (sessionValue != null)
-	        		{
-	        			// setup response version number
-	        			version = sessionValue.sessionVersion;
+				System.out.println("For NEWBIE!!");
 				
-	        			// setup response message
-	        			message = sessionValue.sessionMessage;
-	        		}
-	        		else // error handling in case of null pointer
-	        		{
-	        			version = 0;
-	        			message = "Hello User";
-	        		}
-					
-					// create a new cookie object (timeout set to 5 minutes)
-					Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", sessionID);
-					returnVisitorCookie.setMaxAge(60*5);
-					response.addCookie(returnVisitorCookie);
-	        	}
-	        }*/
+				// create a new session ID
+				sessionID = UUID.randomUUID().toString();
+				
+				// calculate the cookie expire timestamp
+				Date expired = new Date(System.currentTimeMillis()+5*60*1000);
+				expireTimestamp = sdf.format(expired);
+				
+				// setup initial message
+				message = "Hello User";
+				
+				// setup initial version
+				version = 1;
+				
+	    		RPCClient client = new RPCClient();
+	    		SessionValues sv = client.sessionWriteClient(sessionID + "_0", message, callID);
+	    		if(sv != null)
+	    		{
+	    			expireTimestamp = sv.sessionExpiredTS;
+	    			sessionID = sv.returnSessionID;
+	    		}
+	    		callID++;	 
+	    		
+	    		cookieValue = sessionID + "_" + sv.sessionVersion + "," + sv.locMetaData + "dummyParam";
+	    		
+	    		// create a new cookie object (timeout set to 5 minutes)	        		
+	    		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
+	    		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
+	    		returnVisitorCookie.setPath("/");
+	    		returnVisitorCookie.setMaxAge(60*5);
+	    		response.addCookie(returnVisitorCookie);
+	        }
 	        else if(request.getParameter("btnNetworkRead") != null)
 	        {
 	        	if (cookie != null)
@@ -220,6 +148,8 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
+	        		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
+	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
 	        	}
@@ -251,7 +181,7 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)	        		
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-	        		returnVisitorCookie.setDomain(".wl553.bigdata.systems");
+	        		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
 	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
@@ -284,7 +214,7 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-	        		returnVisitorCookie.setDomain(".wl553.bigdata.systems");
+	        		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
 	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
@@ -295,34 +225,19 @@ public class HomePage extends HttpServlet
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		String docType = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 " + "Transitional//EN\">\n";
-		if(regularPage) // return a regular page
-		{
-			out.println(docType +
-					"<HTML>\n" +
-					"<HEAD><TITLE>CS 5300 Project 1b</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
-					"NetID: ah935<br><br>\n" +
-					"Session: " + sessionID + "<br><br>\n" +
-					"Version: " + version + "<br><br>\n" +
-					"Date: " + currentTimestamp + "\n" +
-					"<H1>" + message + "</H1>\n" +
-					//"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnReplace\" type=\"submit\" value=\"Replace\"></form>\n" +
-					"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Network Write\"></form>\n" +
-					"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"></form>" +
-					//"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnRefresh\" type=\"submit\" value=\"Refresh\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"><br><br><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"></form>" +
-					"Cookie: " + cookieValue + "<br><br>\n" +
-					"Expires: " + expireTimestamp + "\n" +
-					"</BODY></HTML>");
-		}
-		else // return the logout page
-		{
-			out.println(docType +
-					"<HTML>\n" +
-					"<HEAD><TITLE>CS 5300 Project 1b</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
-					"<H1>You have logged out. Thank you for using this website!</H1>\n" +
-					"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnReload\" type=\"submit\" value=\"Reload the Website\"></form>" +
-					"</BODY></HTML>");
-		}
-		
+		out.println(docType +
+			"<HTML>\n" +
+			"<HEAD><TITLE>CS 5300 Project 1b</TITLE></HEAD><BODY BGCOLOR=\"#FDF5E6\">\n" +
+			"NetID: ah935, nl443, wl533<br><br>\n" +
+			"Session: " + sessionID + "<br><br>\n" +
+			"Version: " + version + "<br><br>\n" +
+			"Date: " + currentTimestamp + "\n" +
+			"<H1>" + message + "</H1>\n" +
+			"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Network Write\"></form>\n" +
+			"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"></form>" +
+			"Cookie: " + cookieValue + "<br><br>\n" +
+			"Expires: " + expireTimestamp + "\n" +
+			"</BODY></HTML>");
 		try
 		{
 			checkForExpiredCookies();

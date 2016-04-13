@@ -6,6 +6,9 @@ public class Globals
 {
 	public static Hashtable<String, SessionValues> hashtable;
 	public static Hashtable<String, String> ipAddressMapping;
+	public static final int R = 2;
+	public static final int W = 3;
+	public static final int WQ = 2;
 	
 	static
 	{

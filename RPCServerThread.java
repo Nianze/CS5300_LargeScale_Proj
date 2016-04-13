@@ -40,7 +40,7 @@ public class RPCServerThread extends Thread
             	String value = (String)jsonAttribute.get("Value");
             	Globals.ipAddressMapping.put(key, value);
             }
-            
+                        
 			DatagramSocket rpcSocket = new DatagramSocket(portProj1bRPC);
 			while(true)
 			{
@@ -75,7 +75,7 @@ public class RPCServerThread extends Thread
 							
 							sv.sessionExpiredTS = expireTimestamp;
 							sv.sessionVersion += 1;
-							sessionID = UUID.randomUUID().toString();
+							//sessionID = UUID.randomUUID().toString();
 							Globals.hashtable.put(sessionID, sv);
 							reply = callID + "_" + sessionID + "_" + sv.sessionVersion + "_" + sv.sessionMessage + "_" + sv.sessionExpiredTS + "_" + "dummyParam";
 						}
@@ -94,7 +94,7 @@ public class RPCServerThread extends Thread
 							sv.sessionVersion = (currentVersion+1);
 							sv.sessionExpiredTS = expireTimestamp;
 							sv.locMetaData = metaData;
-							sessionID = UUID.randomUUID().toString();
+							//sessionID = UUID.randomUUID().toString();
 							Globals.hashtable.put(sessionID, sv);
 						}
 						else
@@ -104,10 +104,10 @@ public class RPCServerThread extends Thread
 							
 							sv = new SessionValues(currentVersion+1, newMessage, expireTimestamp);
 							sv.locMetaData = metaData;
-							sessionID = UUID.randomUUID().toString();
+							//sessionID = UUID.randomUUID().toString();
 							Globals.hashtable.put(sessionID, sv);
 						}
-						reply = callID + "_" + sessionID + "_" + sv.sessionVersion + "_" + sv.sessionMessage + "_" + sv.sessionExpiredTS + "_" + sv.locMetaData;
+						reply = callID + "_" + sessionID + "_" + sv.sessionVersion + "_" + sv.sessionMessage + "_" + sv.sessionExpiredTS + "_" + sv.locMetaData + "_" + "dummyParam";
 						break;
 					}
 					default:
