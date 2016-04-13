@@ -7,6 +7,8 @@ public class SessionValues
 	public String sessionExpiredTS;
 	public String locMetaData;
 	public String returnSessionID="";
+	public String readServerID="";
+	public String writeServerID="";
 	
 	public SessionValues(Integer version, String message, String expiredTS)
 	{

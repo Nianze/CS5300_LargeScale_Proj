@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.Map.Entry;
 
 public class RPCClient 
 {
@@ -58,10 +59,22 @@ public class RPCClient
 			String returnSessionID = "";
 			int version = -1;
 			String expiredTS = "";
+			String returnServerID = "";
 			do
 			{
 				rpcSocket.receive(recvPkt);
+				
+				// check which serverID responded to the request
 				String response = new String(recvPkt.getData());
+				String returnAddress = recvPkt.getAddress().getHostAddress();
+		        for (Entry<String, String> entry : Globals.ipAddressMapping.entrySet())
+		        {
+		            if (entry.getValue().equals(returnAddress))
+		            {
+		                returnServerID = entry.getKey();
+		            }
+		        }
+				
 				System.out.println("SPCClient Received Response: " + response);
 				String[] parts = response.split("_");
 				replyCallID = Integer.parseInt(parts[0]);
@@ -75,6 +88,7 @@ public class RPCClient
 			
 			SessionValues sv = new SessionValues(version, message, expiredTS);
 			sv.returnSessionID = returnSessionID;
+			sv.readServerID = returnServerID;
 			return sv;
 		}
 		catch (SocketException e) 
@@ -132,13 +146,26 @@ public class RPCClient
 			Integer replyCallID = -1;
 			String message = "";
 			String returnSessionID = "";
+			String returnServerID = "";
 			int version = -1;
 			String expiredTS = "";
 			
 			int wait4WQ = 0;
 			do{
 				rpcSocket.receive(recvPkt);
+				
+				// check which serverID responded to the request
 				String response = new String(recvPkt.getData());
+				String returnAddress = recvPkt.getAddress().getHostAddress();
+		        for (Entry<String, String> entry : Globals.ipAddressMapping.entrySet())
+		        {
+		            if (entry.getValue().equals(returnAddress))
+		            {
+		                returnServerID += entry.getKey();
+		                returnServerID += "_";
+		            }
+		        }
+				
 				System.out.println("SPCClient Received Response: " + response);
 				String[] parts = response.split("_");
 				replyCallID = Integer.parseInt(parts[0]);
@@ -150,10 +177,10 @@ public class RPCClient
 			} while(wait4WQ < Globals.WQ);
 			
 			rpcSocket.close();
-			
 			SessionValues sv = new SessionValues(version, message, expiredTS);
-			sv.locMetaData = builder.toString();
+			sv.locMetaData = returnServerID;
 			sv.returnSessionID = returnSessionID;
+			sv.writeServerID = returnServerID.substring(0, returnServerID.length()-1);
 			return sv;
 		}
 		catch (SocketException e) 

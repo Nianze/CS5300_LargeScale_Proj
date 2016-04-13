@@ -23,6 +23,8 @@ public class HomePage extends HttpServlet
 	private Integer version = 0;
 	private String currentTimestamp = "";
 	private String expireTimestamp = "";
+	private String readServerID = "";
+	private String writeServerID = "";
 	private int callID = 0;	
 	public SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss a");
 	
@@ -72,6 +74,8 @@ public class HomePage extends HttpServlet
     		{
     			expireTimestamp = sv.sessionExpiredTS;
     			sessionID = sv.returnSessionID;
+    			writeServerID = sv.writeServerID;
+    			readServerID = "";
     		}
     		callID++;	 
     		
@@ -79,7 +83,7 @@ public class HomePage extends HttpServlet
     		
     		// create a new cookie object (timeout set to 5 minutes)	        		
     		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-    		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
+    		returnVisitorCookie.setDomain(Globals.cookieDomain);
     		returnVisitorCookie.setPath("/");
     		returnVisitorCookie.setMaxAge(60*5);
     		response.addCookie(returnVisitorCookie);
@@ -109,6 +113,8 @@ public class HomePage extends HttpServlet
 	    		{
 	    			expireTimestamp = sv.sessionExpiredTS;
 	    			sessionID = sv.returnSessionID;
+	    			writeServerID = sv.writeServerID;
+	    			readServerID = "";
 	    		}
 	    		callID++;	 
 	    		
@@ -116,7 +122,7 @@ public class HomePage extends HttpServlet
 	    		
 	    		// create a new cookie object (timeout set to 5 minutes)	        		
 	    		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-	    		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
+	    		returnVisitorCookie.setDomain(Globals.cookieDomain);
 	    		returnVisitorCookie.setPath("/");
 	    		returnVisitorCookie.setMaxAge(60*5);
 	    		response.addCookie(returnVisitorCookie);
@@ -138,9 +144,11 @@ public class HomePage extends HttpServlet
 	        		if(sv != null)
 	        		{
 	        			version = sv.sessionVersion;
-	        			message = sv.sessionMessage + " Network Version!!";
+	        			message = sv.sessionMessage;
 	        			sessionID = sv.returnSessionID;
 	        			expireTimestamp = sv.sessionExpiredTS;
+	        			readServerID = sv.readServerID;
+	        			writeServerID = "";
 	        		}
 	        		callID++;
 	        		
@@ -148,7 +156,7 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-	        		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
+	        		returnVisitorCookie.setDomain(Globals.cookieDomain);
 	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
@@ -171,9 +179,11 @@ public class HomePage extends HttpServlet
 	        		if(sv != null)
 	        		{
 	        			version = sv.sessionVersion;
-	        			message = sv.sessionMessage + " Network Version!!";
+	        			message = sv.sessionMessage;
 	        			sessionID = sv.returnSessionID;
 	        			expireTimestamp = sv.sessionExpiredTS;
+	        			writeServerID = sv.writeServerID;
+	        			readServerID = "";
 	        		}
 	        		callID++;
 	        		
@@ -181,7 +191,7 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)	        		
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-	        		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
+	        		returnVisitorCookie.setDomain(Globals.cookieDomain);
 	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
@@ -204,9 +214,11 @@ public class HomePage extends HttpServlet
 	        		if(sv != null)
 	        		{
 	        			version = sv.sessionVersion;
-	        			message = sv.sessionMessage + " Network Version!!";
+	        			message = sv.sessionMessage;
 	        			sessionID = sv.returnSessionID;
 	        			expireTimestamp = sv.sessionExpiredTS;
+	        			readServerID = sv.readServerID;
+	        			writeServerID = "";
 	        		}
 	        		callID++;
 	        		
@@ -214,7 +226,7 @@ public class HomePage extends HttpServlet
 	        		
 	        		// create a new cookie object (timeout set to 5 minutes)
 	        		Cookie returnVisitorCookie = new Cookie("CS5300PROJ1SESSION", cookieValue);
-	        		returnVisitorCookie.setDomain(".ah935.bigdata.systems");
+	        		returnVisitorCookie.setDomain(Globals.cookieDomain);
 	        		returnVisitorCookie.setPath("/");
 	        		returnVisitorCookie.setMaxAge(60*5);
 	        		response.addCookie(returnVisitorCookie);
@@ -231,11 +243,14 @@ public class HomePage extends HttpServlet
 			"NetID: ah935, nl443, wl533<br><br>\n" +
 			"Session: " + sessionID + "<br><br>\n" +
 			"Version: " + version + "<br><br>\n" +
+			"Read From Server ID: " + readServerID + "<br><br>\n" +
+			"Write To Server ID: " + writeServerID + "<br><br>\n" +
+			"Cookie Domain: " + Globals.cookieDomain + "<br><br>\n" +
 			"Date: " + currentTimestamp + "\n" +
 			"<H1>" + message + "</H1>\n" +
 			"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Network Write\"></form>\n" +
 			"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"></form>" +
-			"Cookie: " + cookieValue + "<br><br>\n" +
+			"Cookie Value: " + cookieValue + "<br><br>\n" +
 			"Expires: " + expireTimestamp + "\n" +
 			"</BODY></HTML>");
 		try
