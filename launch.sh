@@ -3,7 +3,7 @@
 # Please fill in these parameters
 AMI=ami-08111162
 NUM_NODES=3
-S3_BUCKET=edu-cornell-cs-cs5300s16-ah935
+S3_BUCKET=XXXX
 ACCESS_KEY_ID=XXXX
 SECRET_ACCESS_KEY=XXXX
 
