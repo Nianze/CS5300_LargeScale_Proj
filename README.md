@@ -32,15 +32,15 @@ TODO Items:
 - ~~Periodic update of the server IP table to reflect other server up/down changes~~
 - ~~IP tracking of a session (which IPs have information regarding a particular session)~~
 - ~~Modify session version logic? (current logic is version++ upon every request and no storing info of old versions)~~
-- Garbage Collection logic of timeout sessions
-* The SvrID and reboot_num of the server executing the client request
+- ~~Garbage Collection logic of timeout sessions~~
+* ~~The SvrID and reboot_num of the server executing the client request~~
   * Inet4Address.getLocalHost().getHostAddress() + ipAddressMapping --> serverid
   * reboot.sh:
       1. increase the reboot_num in /home/ec2-user/reboot_num.txt
       2. sudo service tomcat8 start
-* Report the SvrID where the session data was found
-* Local meta data of WQ servers
-* Cookie domain: xxx.bigdata.systems
+* ~~Report the SvrID where the session data was found~~
+* ~~Local meta data of WQ servers~~
+* ~~Cookie domain: xxx.bigdata.systems~~
 
 SSM Parameters:
 - N = 3 (3 total instances/nodes)
