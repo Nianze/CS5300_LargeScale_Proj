@@ -1,7 +1,6 @@
 package sessionManagement;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -256,8 +255,8 @@ public class HomePage extends HttpServlet
 			"Cookie Domain: " + Globals.cookieDomain + "<br><br>\n" +
 			"Date: " + currentTimestamp + "\n" +
 			"<H1>" + message + "</H1>\n" +
-			"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Network Write\"></form>\n" +
-			"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnNetworkRead\" type=\"submit\" value=\"Network Read\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"></form>" +
+			"<form action=\"/project-1b/home-page\" method=\"post\"><input name=\"cookieMessage\" type=\"text\">&nbsp&nbsp<input name=\"btnNetworkWrite\" type=\"submit\" value=\"Replace\"></form>\n" +
+			"<form action=\"/project-1b/home-page\" method=\"get\"><input name=\"btnNetworkRead\" type=\"submit\" value=\"Refresh\"><br><br><input name=\"btnLogout\" type=\"submit\" value=\"Logout\"></form>" +
 			"Cookie Value: " + cookieValue + "<br><br>\n" +
 			"Expires: " + expireTimestamp + "\n" +
 			"</BODY></HTML>");
