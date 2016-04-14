@@ -39,15 +39,11 @@ do
         break
     fi
 done
-
 # retrieve ip and ami index info of all instances
 aws sdb select --consistent-read --select-expression "select * from ipAddressInfo" > /home/ec2-user/ipAddrInfo.txt
-
 # download the war file from s3 into the tomcat webapps folder
 aws s3 cp s3://${S3_BUCKET}/project-1b.war /var/lib/tomcat8/webapps/project-1b.war
-
 # set permission so the program can access the files in this folder
 chmod o+x /home/ec2-user
-
 # start tomcat8 server
 service tomcat8 start
