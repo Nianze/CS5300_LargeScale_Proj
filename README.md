@@ -8,9 +8,10 @@ NEW DEPLOY PROCEDURES:
   * clear security group name "cs5300tomcat" from the aws web console if there exists one
   * delete project-1b.war file from your s3 bucket
 2. fill in the parameters at the top of the launch.sh and script.sh files with your own credentials and s3 bucket name
-3. place launch.sh, script.sh and project-1b.war all in the same directory
-4. open the terminal pointing to that directory
-5. run ./launch.sh
+3. fill in the cookie domain in Globals.cookieDomain. (in our case it is ".xxyyy.bigdata.systems")
+4. place launch.sh, script.sh and project-1b.war all in the same directory
+5. open the terminal pointing to that directory
+6. run ./launch.sh
 
 Setup Procedures:
 
