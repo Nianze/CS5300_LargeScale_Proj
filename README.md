@@ -1,6 +1,17 @@
 # CS5300PROJECT
 A private repo for CS5300 projects
 
+NEW DEPLOY PROCEDURES:
+
+1. the installation scripts assume nothing has been setup so we need to first clear everything
+  * clear everything in simple db: run the command "aws sdb delete-domain --domain-name ipAddressInfo"
+  * clear security group name "cs5300tomcat" from the aws web console if there exists one
+  * delete project-1b.war file from your s3 bucket
+2. fill in the parameters at the top of the launch.sh and script.sh files with your own credentials and s3 bucket name
+3. place launch.sh, script.sh and project-1b.war all in the same directory
+4. open the terminal pointing to that directory
+5. run ./launch.sh
+
 Setup Procedures:
 
 1) create a dynamic web project in Eclipse EE <br>
