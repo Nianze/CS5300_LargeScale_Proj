@@ -28,14 +28,29 @@
      callID_operationCode_sessionIDWithVersion_dummyParam
 
      * callID is a unique ID for the call.
+
      * operationCode is either 0 or 1. 
+
        * For read request, operationCode = 0; 
        * For write request, operationCode = 1.
+
      * sessionIDWithVersion is in the format of 
+
        * sessionID_sessionVersion
-     * ​
+
+       which is exactly the first half of cookieValue mentioned above.
+
+     * dummyParam is dummy with no usability currently.
 
    * RPC server message:
+
+     * For read request:
+
+       callID_sessionID_sessionVersion_sessionMessage_sessionExpiredTS_dummyParam
+
+     * For write request:
+
+       callID_sessionID_sessionVersion_sessionMessage_sessionExpiredTS_locMetaData_dummyParam
 
 3. Funcionalities in each source file
 
