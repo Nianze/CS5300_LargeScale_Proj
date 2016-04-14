@@ -3,9 +3,9 @@
 # Please fill in these parameters
 # note that the nodeNum refers to the number of nodes launched and needs to be declare as a string with double quotes
 nodeNum="3"
-S3_BUCKET=edu-cornell-cs-cs5300s16-nl443
-ACCESS_KEY_ID=AKIAJYLRRN3S3DVRZUSA
-SECRET_ACCESS_KEY=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
+S3_BUCKET=XXXX
+ACCESS_KEY_ID=XXXXX
+SECRET_ACCESS_KEY=XXXXX
 
 # remove java 1.7 and install java 1.8 + tomcat 8
 yum -y remove java-1.7.0-openjdk

@@ -3,9 +3,10 @@
 # Please fill in these parameters
 AMI=ami-08111162
 NUM_NODES=3
-S3_BUCKET=edu-cornell-cs-cs5300s16-nl443
-ACCESS_KEY_ID=AKIAJYLRRN3S3DVRZUSA
-SECRET_ACCESS_KEY=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
+S3_BUCKET=XXXX
+ACCESS_KEY_ID=XXXX
+SECRET_ACCESS_KEY=XXXX
+KEY_NAME=XXXX
 
 # Setup SimpleDB and create a domain so the installation script can store ip info
 aws configure set aws_access_key_id ${ACCESS_KEY_ID}
@@ -26,4 +27,4 @@ aws ec2 authorize-security-group-ingress --group-name cs5300tomcat --protocol tc
 aws ec2 authorize-security-group-ingress --group-name cs5300tomcat --protocol udp --port 5300 --cidr 0.0.0.0/0
 
 # Launch the instances
-aws ec2 run-instances --image-id ${AMI} --count ${NUM_NODES} --instance-type t2.micro --security-groups cs5300tomcat --key-name cs5300aws --user-data file://script.sh
+aws ec2 run-instances --image-id ${AMI} --count ${NUM_NODES} --instance-type t2.micro --security-groups cs5300tomcat --key-name ${KEY_NAME} --user-data file://install.sh
