@@ -14,6 +14,9 @@ yum -y install tomcat8-webapps tomcat8-docs-webapp tomcat8-admin-webapps
 
 cd /home/ec2-user
 
+# create rebootNum.txt to keep track of the reboot number
+echo 0 > rebootNum.txt
+
 # get the ip and ami index info of this instance
 wget http://169.254.169.254/latest/meta-data/local-ipv4
 wget http://169.254.169.254/latest/meta-data/ami-launch-index
