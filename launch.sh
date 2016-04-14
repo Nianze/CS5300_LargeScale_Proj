@@ -14,8 +14,9 @@ aws configure set default.region us-east-1
 aws configure set preview.sdb true
 aws sdb create-domain --domain-name ipAddressInfo
 
-# Upload the war file onto S3 bucket so the installation script and download from S3
+# Upload the war file and reboot.sh onto S3 bucket so the installation script and download from S3
 aws s3 cp project-1b.war s3://{S3_BUCKET}/project-1b.war
+aws s3 cp reboot.sh s3://{S3_BUCKET}/reboot.sh
 
 # Setup a security group with the proper ports enabled
 aws ec2 create-security-group --group-name cs5300tomcat --description "security group for cs5300 instances"
