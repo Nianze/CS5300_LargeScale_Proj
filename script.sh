@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Please fill in these parameters
+# note that the nodeNum refers to the number of nodes launched and needs to be declare as a string with double quotes
+nodeNum="3"
+S3_BUCKET=edu-cornell-cs-cs5300s16-ah935
+ACCESS_KEY_ID=AKIAJEPSLO6AH7DOYNQQ
+SECRET_ACCESS_KEY=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
+
 # remove java 1.7 and install java 1.8 + tomcat 8
 yum -y remove java-1.7.0-openjdk
 yum -y install java-1.8.0
@@ -14,16 +21,13 @@ ipVar=$(cat local-ipv4)
 indexVar=$(cat ami-launch-index)
 
 # setup aws sdb configuration
-aws configure set aws_access_key_id AKIAJEPSLO6AH7DOYNQQ
-aws configure set aws_secret_access_key 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
+aws configure set aws_access_key_id ${ACCESS_KEY_ID}
+aws configure set aws_secret_access_key ${SECRET_ACCESS_KEY}
 aws configure set default.region us-east-1
 aws configure set preview.sdb true
 
 # put the information into sdb
 aws sdb put-attributes --domain-name ipAddressInfo --item-name ${indexVar} --attributes "[{\"Name\": \"internalIPAddress\", \"Value\": \"${ipVar}\", \"Replace\":true}]"
-
-# declare number of N nodes starting
-nodeNum="3"
 
 # need to wait here for all nodes
 while true
@@ -36,11 +40,14 @@ do
     fi
 done
 
-
 # retrieve ip and ami index info of all instances
 aws sdb select --consistent-read --select-expression "select * from ipAddressInfo" > /home/ec2-user/ipAddrInfo.txt
 
-# set permission
-chmod o+x /var/lib/tomcat8/webapps
+# download the war file from s3 into the tomcat webapps folder
+aws s3 cp s3://${S3_BUCKET}/project-1b.war /var/lib/tomcat8/webapps/project-1b.war
+
+# set permission so the program can access the files in this folder
 chmod o+x /home/ec2-user
-chmod o+x /var/log/tomcat8
+
+# start tomcat8 server
+service tomcat8 start
