@@ -36,7 +36,7 @@ TODO Items:
 - ~~Garbage Collection logic of timeout sessions~~
 * ~~The SvrID and reboot_num of the server executing the client request~~
   * ~~Inet4Address.getLocalHost().getHostAddress() + ipAddressMapping --> serverid~~
-  * ~~reboot.sh:
+  * ~~reboot.sh:~~
       1. ~~increase the reboot_num in /home/ec2-user/reboot_num.txt~~
       2. ~~sudo service tomcat8 start~~
 * ~~Report the SvrID where the session data was found~~
