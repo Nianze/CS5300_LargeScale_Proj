@@ -3,9 +3,9 @@
 # Please fill in these parameters
 # note that the nodeNum refers to the number of nodes launched and needs to be declare as a string with double quotes
 nodeNum="3"
-S3_BUCKET=XXXX
-ACCESS_KEY_ID=XXXX
-SECRET_ACCESS_KEY=XXXX
+S3_BUCKET=edu-cornell-cs-cs5300s16-nl443
+ACCESS_KEY_ID=AKIAJYLRRN3S3DVRZUSA
+SECRET_ACCESS_KEY=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
 
 # remove java 1.7 and install java 1.8 + tomcat 8
 yum -y remove java-1.7.0-openjdk
@@ -50,5 +50,7 @@ aws s3 cp s3://${S3_BUCKET}/project-1b.war /var/lib/tomcat8/webapps/project-1b.w
 aws s3 cp s3://${S3_BUCKET}/reboot.sh /home/ec2-user/reboot.sh
 # set permission so the program can access the files in this folder
 chmod o+x /home/ec2-user
+# set execute permission on reboot.sh
+chmod +x reboot.sh
 # start tomcat8 server
 service tomcat8 start

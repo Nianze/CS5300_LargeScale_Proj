@@ -9,8 +9,9 @@ public class Globals
 	public static final int R = 2;
 	public static final int W = 3;
 	public static final int WQ = 2;
-	public static final String cookieDomain = ".ah935.bigdata.systems";
+	public static final String cookieDomain = ".nl443.bigdata.systems";
 	public static String currentServerID = "";
+	public static String rebootNum = ""; 
 	
 	static
 	{

@@ -74,7 +74,6 @@ public class RPCClient
 		                returnServerID = entry.getKey();
 		            }
 		        }
-				
 				System.out.println("SPCClient Received Response: " + response);
 				String[] parts = response.split("_");
 				replyCallID = Integer.parseInt(parts[0]);
@@ -113,7 +112,7 @@ public class RPCClient
 			// randomly choose W ip address instances to write new session (add those ip into requestAddress)
 			ArrayList<String> copy = new ArrayList<String>(Globals.ipAddressMapping.keySet());
 			Collections.shuffle(copy);
-			String[] locMetaData = new String[Globals.W];
+			locMetaData = new String[Globals.W];
 			for(int i = 0; i < Globals.W; i++){
 				locMetaData[i] = copy.get(i); 
 				requestAddress.add(InetAddress.getByName(Globals.ipAddressMapping.get(locMetaData[i])));

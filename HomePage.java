@@ -233,6 +233,12 @@ public class HomePage extends HttpServlet
 	        	}
 	        }
 		}
+		// get the current reboot number
+		BufferedReader rebootReader = new BufferedReader(new FileReader("/home/ec2-user/rebootNum.txt"));
+		if(rebootReader != null){
+			Globals.rebootNum = rebootReader.readLine();
+			rebootReader.close();
+		}
 		
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
@@ -244,6 +250,7 @@ public class HomePage extends HttpServlet
 			"Session: " + sessionID + "<br><br>\n" +
 			"Version: " + version + "<br><br>\n" +
 			"You are currently on server ID: " + Globals.currentServerID + "<br><br>\n" +
+			"Current server reboot number: " + Globals.rebootNum + "<br><br>\n" +
 			"Getting Read From Server ID: " + readServerID + "<br><br>\n" +
 			"Sending Write To Server IDs: " + writeServerID + "<br><br>\n" +
 			"Cookie Domain: " + Globals.cookieDomain + "<br><br>\n" +

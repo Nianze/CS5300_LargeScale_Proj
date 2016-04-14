@@ -3,9 +3,9 @@
 # Please fill in these parameters
 AMI=ami-08111162
 NUM_NODES=3
-S3_BUCKET=XXXX
-ACCESS_KEY_ID=XXXX
-SECRET_ACCESS_KEY=XXXX
+S3_BUCKET=edu-cornell-cs-cs5300s16-nl443
+ACCESS_KEY_ID=AKIAJYLRRN3S3DVRZUSA
+SECRET_ACCESS_KEY=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
 
 # Setup SimpleDB and create a domain so the installation script can store ip info
 aws configure set aws_access_key_id ${ACCESS_KEY_ID}
@@ -15,8 +15,8 @@ aws configure set preview.sdb true
 aws sdb create-domain --domain-name ipAddressInfo
 
 # Upload the war file and reboot.sh onto S3 bucket so the installation script and download from S3
-aws s3 cp project-1b.war s3://{S3_BUCKET}/project-1b.war
-aws s3 cp reboot.sh s3://{S3_BUCKET}/reboot.sh
+aws s3 cp project-1b.war s3://${S3_BUCKET}/project-1b.war
+aws s3 cp reboot.sh s3://${S3_BUCKET}/reboot.sh
 
 # Setup a security group with the proper ports enabled
 aws ec2 create-security-group --group-name cs5300tomcat --description "security group for cs5300 instances"

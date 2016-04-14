@@ -7,10 +7,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.*;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -35,6 +32,12 @@ public class RPCServerThread extends Thread
     			br.close();
     		}
     		
+    		BufferedReader rebootReader = new BufferedReader(new FileReader("/home/ec2-user/rebootNum.txt"));
+    		if(rebootReader != null){
+    			Globals.rebootNum = rebootReader.readLine();
+    			rebootReader.close();
+    		}
+    		
     		// parse the IP address file and load the mapping into memory
     		JSONParser parser = new JSONParser();
     		Object obj = parser.parse(new FileReader("/home/ec2-user/ipAddrInfo.txt"));
@@ -50,7 +53,7 @@ public class RPCServerThread extends Thread
             	String value = (String)jsonAttribute.get("Value");
             	Globals.ipAddressMapping.put(key, value);
             }
-                        
+            
 			DatagramSocket rpcSocket = new DatagramSocket(portProj1bRPC);
 			while(true)
 			{
@@ -73,21 +76,22 @@ public class RPCServerThread extends Thread
 				String sessionID = parts[2];
 				Integer currentVersion = Integer.parseInt(parts[3]);
 				String reply = "";
-				SessionValues sv = Globals.hashtable.get(sessionID);
+				SessionValues sv = Globals.hashtable.get(sessionID);				
+				boolean  hasSessVal = true;				
 				switch(operationCode)
 				{
 					case 0: //sessionRead operation
 					{
 						if(sv != null)
-						{
-		        			// currently a naive way to create new session ID: using UUID
-		        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
-							
+						{							
 							sv.sessionExpiredTS = expireTimestamp;
 							sv.sessionVersion += 1;
 							//sessionID = UUID.randomUUID().toString();
 							Globals.hashtable.put(sessionID, sv);
 							reply = callID + "_" + sessionID + "_" + sv.sessionVersion + "_" + sv.sessionMessage + "_" + sv.sessionExpiredTS + "_" + "dummyParam";
+						}else{ 
+							// in the case that this server do not store the required session value, do not reply!
+							hasSessVal = false;
 						}
 						break;
 					}
@@ -97,21 +101,15 @@ public class RPCServerThread extends Thread
 						String metaData = parts[5];
 						if(sv!= null)
 						{
-		        			// currently a naive way to create new session ID: using UUID
-		        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
-							
+
 							sv.sessionMessage = newMessage;
 							sv.sessionVersion = (currentVersion+1);
 							sv.sessionExpiredTS = expireTimestamp;
-							sv.locMetaData = metaData;
-							//sessionID = UUID.randomUUID().toString();
+							sv.locMetaData = metaData;							
 							Globals.hashtable.put(sessionID, sv);
 						}
 						else
 						{
-		        			// currently a naive way to create new session ID: using UUID
-		        			// TODO: should change to the form < SvrID, reboot_num, sess_num >
-							
 							sv = new SessionValues(currentVersion+1, newMessage, expireTimestamp);
 							sv.locMetaData = metaData;
 							//sessionID = UUID.randomUUID().toString();
@@ -121,13 +119,16 @@ public class RPCServerThread extends Thread
 						break;
 					}
 					default:
-						break;
+						hasSessVal = false;
 				}
 				
-				byte[] outBuf = new byte[256];
-				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, returnAddr, returnPort);
-				sendPkt.setData(reply.getBytes());
-				rpcSocket.send(sendPkt);
+				if(hasSessVal){
+					byte[] outBuf = new byte[256];
+					DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, returnAddr, returnPort);
+					sendPkt.setData(reply.getBytes());
+					rpcSocket.send(sendPkt);
+				}
+				
 			}
 		} 
     	catch (SocketException e) 

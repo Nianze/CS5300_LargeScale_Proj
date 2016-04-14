@@ -1,17 +1,11 @@
 package sessionManagement;
 
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 public class RPCServer implements ServletContextListener 
 {
