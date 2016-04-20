@@ -1,0 +1,3 @@
+Hadoop Reference:
+http://www.ashishpaliwal.com/blog/2012/05/hadoop-recipe-using-custom-java-counters/
+http://www.thecloudavenue.com/2011/11/passing-parameters-to-mappers-and.html
