@@ -8,10 +8,12 @@ public class Ref {
  * 3. BC type: 2_srcNodeID_dstNodeID_R, where R = PR(src)/Deg(src)
  */
 	public static int PASS_NUM = 0;
+	
 	public static final int NUM_NODES = 685230;	
+	public static final int NUM_BLOCK = 68;
 	public static final float INITIAL_PR = (1.0f/NUM_NODES);
 	public static final float DAMPING_FACTOR = 0.85f;
-	public static final int NUM_BLOCK = 68;
+	public static final float THRESHOLD = 0.001f;
 	
 	public static final int typNode = 0; //code for type of node
 	public static final int typBE = 1; // code for type of block edges
