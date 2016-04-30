@@ -38,8 +38,8 @@ public class BlockMapper extends Mapper<LongWritable, Text, Text, Text> {
 		if(count > 0){
 			int srcNodeID = Integer.parseInt(parts[0]);
 			int dstNodeID = Integer.parseInt(parts[1]);
-			float pageRank = Float.parseFloat(parts[2]);
-			int degree = Integer.parseInt(parts[3]);
+			Float pageRank = Float.parseFloat(parts[2]);
+			Integer degree = Integer.parseInt(parts[3]);
 			int srcBlockID = Ref.blockIDofNode(srcNodeID);
 			int dstBlockID = Ref.blockIDofNode(dstNodeID);
 			
@@ -59,8 +59,8 @@ public class BlockMapper extends Mapper<LongWritable, Text, Text, Text> {
 				context.write(srcNodeKey, BETypeVal);
 			}else{			
 			// create BC type output: 2_srcNodeID_dstNodeID_R, where R = PR(srcNode)/Degree(srcNode)
-				float R = pageRank / degree;
-				String boundaryCondition = "" + Ref.typBC +"_"+ parts[0] +"_"+ parts[1] +"_"+ R;
+			// note that nodes in special case where dstNodeID = -1 will go as BC type
+				String boundaryCondition = "" + Ref.typBC +"_"+ parts[0] +"_"+ parts[1] +"_"+ pageRank.toString() +"_"+ degree.toString();
 				Text BCTypeVal = new Text(boundaryCondition);
 				context.write(dstNodeKey, BCTypeVal);
 			}

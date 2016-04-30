@@ -5,7 +5,7 @@ public class Ref {
  * there are three types of output to save in each pass:
  * 1. Node type: 0_nodeID_PR_Degree
  * 2. BE type: 1_srcNodeID_dstNodeID
- * 3. BC type: 2_srcNodeID_dstNodeID_R, where R = PR(src)/Deg(src)
+ * 3. BC type: 2_srcNodeID_dstNodeID_PR_Deg, where PR = PR(src), Deg = Degree(src)
  */
 	public static int PASS_NUM = 0;
 	

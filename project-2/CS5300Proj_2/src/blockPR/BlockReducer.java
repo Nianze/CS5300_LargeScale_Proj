@@ -13,15 +13,18 @@ import blockPR.PRCounter;
 
 public class BlockReducer extends Reducer<Text, Text, Text, Text> {
 	
-	public class Pair<X, Y> {
+	public class Triplet<X, Y, Z> {
 		public final X x; 
-		public final Y y; 
-		public Pair(X x, Y y){
+		public final Y y;
+		public final Z z;
+		public Triplet(X x, Y y, Z z){
 		    this.x = x; 
-		    this.y = y; 
+		    this.y = y;
+		    this.z = z;
 		}
 		public X first(){return this.x;}
 		public Y second(){return this.y;}
+		public Z third(){return this.z;}
 	}
 	
 	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -72,9 +75,9 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
 			//int blockID = Integer.parseInt(key.toString());
 			// produce in-memory structures
 			HashMap<Integer,Node> nodeSet = new HashMap<Integer,Node>();
-			HashMap<Integer,Float> initNodePR = new HashMap<Integer,Float>();
+			HashMap<Integer,Float> initNodePR = new HashMap<Integer,Float>(); 
 			HashMap<Integer,ArrayList<Integer>> BE = new HashMap<Integer, ArrayList<Integer>>(); // key: dstNodeID, value:srcNodeID
-			HashMap<Integer, ArrayList<Pair<Integer,Float>>> BC = new HashMap<Integer, ArrayList<Pair<Integer,Float>>>(); // key: dstNodeID, value: <srcNodeID,R>
+			HashMap<Integer, ArrayList<Triplet<Integer,Float,Integer>>> BC = new HashMap<Integer, ArrayList<Triplet<Integer,Float,Integer>>>(); // key: dstNodeID, value: <srcNodeID,Degree,PR>
 			
 	   		while (values.iterator().hasNext()){
 	   			Text value = values.iterator().next();
@@ -99,36 +102,49 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
     				break;
     			case Ref.typBC:    				
     				dstNodeID = Integer.parseInt(parts[2]);
-    				float R = Float.parseFloat(parts[3]);
-    				Pair<Integer,Float> outEdge = new Pair<Integer,Float>(srcNodeID, R);
-    				ArrayList<Pair<Integer,Float>> _list = BC.get(dstNodeID);
-    				if(_list == null) _list = new ArrayList<Pair<Integer,Float>>();
+    				float PR = Float.parseFloat(parts[3]);
+    				int deg = Integer.parseInt(parts[4]);
+    				Triplet<Integer,Float,Integer> outEdge = new Triplet<Integer,Float,Integer>(srcNodeID, PR, deg);
+    				ArrayList<Triplet<Integer,Float,Integer>> _list = BC.get(dstNodeID);
+    				if(_list == null) _list = new ArrayList<Triplet<Integer,Float,Integer>>();
     				_list.add(outEdge);
     				BC.put(dstNodeID, _list);
     				break;
     			}
     		}
 			
-	   		// save the 
-	   		
 			// iterate inside block
 			while(IterateBlockOnce(nodeSet, BE, BC) > Ref.THRESHOLD){}
 	   		
-			// figure out the residual
-			
+			// figure out the overall residual in one block
+			Float blockRes = 0.0f;
+			for(int nid : initNodePR.keySet()){
+				float oldVal = initNodePR.get(nid);
+				float newVal = nodeSet.get(nid).PR;
+				blockRes += Math.abs(oldVal-newVal)/newVal;
+			}
 	   		
 			// report to Counter
-			//context.getCounter(PRCounter.TOTAL_RESIDUAL_ERROR).increment(arg0);
+			blockRes *= 1000000;
+			context.getCounter(PRCounter.TOTAL_RESIDUAL_ERROR).increment(blockRes.longValue());
 	   		
 			// create output
-	   		
+	   		for(int dstNID : BE.keySet()){
+	   			
+	   		}			
+	   		for(int dstNID : BC.keySet()){
+	   			Node node = nodeSet.get(dstNID);
+//	   			int dstNodeID = 
+//	   			Edge edge = new Edge();
+	   		}
+
 		}
 		
 	}
 	
 	private float IterateBlockOnce(HashMap<Integer,Node> nodeSet,
 			HashMap<Integer,ArrayList<Integer>> BE, HashMap<Integer, 
-			ArrayList<Pair<Integer,Float>>> BC){
+			ArrayList<Triplet<Integer,Float,Integer>>> BC){
 		
 		return 0.0f;
 	}
