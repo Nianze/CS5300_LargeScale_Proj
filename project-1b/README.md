@@ -1,5 +1,4 @@
-# CS5300PROJECT
-### A private repo for CS5300 projects
+# CS5300PROJECT-1b
 
 #### Overall structure
 
