@@ -7,14 +7,13 @@ import java.io.IOException;
 import java.util.*;
 
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.conf.*;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.*;
-import org.apache.hadoop.util.*;
+import org.apache.hadoop.mapreduce.Counter;
 
 public class SimplePageRank 
 {
-	public static final int NUM_NODES = 5;
+	public static final int NUM_NODES = 685230;
 	public static final int NUM_MR_PASSES = 5;
 	public static final float INITIAL_PR = (1.0f/NUM_NODES);
 	public static final float DAMPING_FACTOR = 0.85f;
@@ -119,6 +118,10 @@ public class SimplePageRank
     			}
     		}
 	   		
+	   		// setup counters
+	   		Counter dataPointCounter = reporter.getCounter(HADOOP_COUNTERS.class.getName(), HADOOP_COUNTERS.NUM_DATA_POINTS.toString());
+   	    	Counter residualErrorCounter = reporter.getCounter(HADOOP_COUNTERS.class.getName(), HADOOP_COUNTERS.TOTAL_RESIDUAL_ERROR.toString());
+	   		
 	   		// compute PageRank logic
 	   		// Eventual output format: "srcNodeID destNodeID srcNodePR srcNumOutLinks"
 	   		// Note we only emit entries in the out_link ArrayList and get rid of duplication
@@ -147,6 +150,9 @@ public class SimplePageRank
 	   					output.collect(null, outValue);
 	   				}
 	   			}
+	   			
+	   	    	residualErrorCounter.increment(0);
+	   	    	dataPointCounter.increment(0);
 	   		}
 	   		else
 	   		{
@@ -169,8 +175,8 @@ public class SimplePageRank
 	   			Float residualError = Math.abs(old_PR-new_PR)/new_PR;
 	   			residualError *= 1000000;
 	   			
-	   			reporter.incrCounter(HADOOP_COUNTERS.TOTAL_RESIDUAL_ERROR, residualError.longValue());
-	   			reporter.incrCounter(HADOOP_COUNTERS.NUM_DATA_POINTS, 1);
+	   	    	residualErrorCounter.increment(residualError.longValue());
+	   	    	dataPointCounter.increment(1);
 	   			
 	   			for(Text t :  out_link)
 	   			{
@@ -189,8 +195,8 @@ public class SimplePageRank
 		// filter a subset from edges.txt (filter parameters for netID ah935)
 		try
 		{
-			// setup writing output file resources
-			/*File file = new File("/home/nanandy/Desktop/CS5300/output.txt");
+			// setup the filtered version of edges.txt file
+			/*File file = new File("/home/nanandy/Desktop/CS5300/edges1.txt");
 			if (!file.exists()) file.createNewFile();
 			FileWriter fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
@@ -211,6 +217,17 @@ public class SimplePageRank
 			bw.close();
 			br.close();*/
 			
+			// get arguments for input and output file paths
+			if(args.length != 2)
+			{
+				System.out.println("Please run the program with 2 arguments: s3n://input_folder/file_name s3n://output_folder/file_name");
+				System.out.println("For example: s3n://edu-cornell-cs-cs5300s16-ah935-mapreduce/input/edges.txt s3n://edu-cornell-cs-cs5300s16-ah935-mapreduce/output/pass");
+				return;
+			}
+			
+			String input = args[0];
+			String output = args[1];
+			
 			// Note: pass 0 sets up the initial input file in a certain format + initialize some info
 			// So there is no calculation or output for pass 0
 			while(count <= NUM_MR_PASSES)
@@ -226,24 +243,24 @@ public class SimplePageRank
 				conf.setOutputFormat(TextOutputFormat.class);
 			
 				if (count == 0)
-					FileInputFormat.setInputPaths(conf, new Path("/home/nanandy/Desktop/CS5300/temp.txt"));
+					FileInputFormat.setInputPaths(conf, new Path(input));
 				else
-					FileInputFormat.setInputPaths(conf, new Path("/home/nanandy/Desktop/CS5300/pass"+count));
+					FileInputFormat.setInputPaths(conf, new Path(output+count));
 				
-				FileOutputFormat.setOutputPath(conf, new Path("/home/nanandy/Desktop/CS5300/pass"+(count+1)));
+				FileOutputFormat.setOutputPath(conf, new Path(output+(count+1)));
 				RunningJob rj = JobClient.runJob(conf);
+				rj.waitForCompletion();
 
 				if (count != 0)
 				{
 					// get counter values and display residual error for this pass
 					Counters counter = rj.getCounters();
-					Long num_data_points = counter.getCounter(HADOOP_COUNTERS.NUM_DATA_POINTS);
-					Long residual_error = counter.getCounter(HADOOP_COUNTERS.TOTAL_RESIDUAL_ERROR);
+					Long num_data_points = counter.findCounter(HADOOP_COUNTERS.NUM_DATA_POINTS).getValue();
+					Long residual_error = counter.findCounter(HADOOP_COUNTERS.TOTAL_RESIDUAL_ERROR).getValue();
 					Float total_residual_error = residual_error/1000000.0f;
 					Float average_residual_error = total_residual_error/num_data_points;
 		    
 					System.out.println("Result from pass " + count);
-					System.out.println("Total Residual Error: " + total_residual_error);
 					System.out.println("Average Residual Error: " + average_residual_error);
 					System.out.println();
 				}
@@ -262,6 +279,6 @@ public class SimplePageRank
 		double fromNetID = 0.539;
 		double rejectMin = 0.9 * fromNetID;
 		double rejectLimit = rejectMin + 0.01;
-		return ( ((x >= rejectMin) || (x < rejectLimit)) ? false : true );
+		return ( ((x >= rejectMin) && (x < rejectLimit)) ? false : true );
 	}
 }
