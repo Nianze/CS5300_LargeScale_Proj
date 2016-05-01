@@ -18,10 +18,8 @@ public class BlockMapper extends Mapper<LongWritable, Text, Text, Text> {
 		// deal with special case: extra newline character at the end
 		if(line.equalsIgnoreCase("")) return;
 		
-		int count = Ref.PASS_NUM; 
-		
-		// case that count == 0, initialize output file: src_dst_PR_Degree  
-		if(count == 0){
+		// case that count == 0, initialize output file: src_dst_PR_Degree
+		if(Ref.PASS_NUM == 0){
 			Text srcIDKey = new Text(parts[0]);
 			Text dstIDKey = new Text(parts[1]);
 			
@@ -35,13 +33,15 @@ public class BlockMapper extends Mapper<LongWritable, Text, Text, Text> {
 		}
 		
 		// case that count > 0, write three type of value for reducer: Node,BE,BC 
-		if(count > 0){
+		if(Ref.PASS_NUM > 0){
 			int srcNodeID = Integer.parseInt(parts[0]);
 			int dstNodeID = Integer.parseInt(parts[1]);
 			Float pageRank = Float.parseFloat(parts[2]);
-			Integer degree = Integer.parseInt(parts[3]);
+			Integer degree = Integer.parseInt(parts[3]); 
 			int srcBlockID = Ref.blockIDofNode(srcNodeID);
-			int dstBlockID = Ref.blockIDofNode(dstNodeID);
+			int dstBlockID = 0; // for special nodes that has no out link, let it link to dummy node in the same block
+			if(degree > 0) dstBlockID = Ref.blockIDofNode(dstNodeID);
+			else dstBlockID = srcBlockID;
 			
 			// key: blockID, srcNodeKey for node type and BE type while dstNodeKey for BC type
 			Text srcNodeKey = new Text(Integer.toString(srcBlockID));
@@ -52,22 +52,23 @@ public class BlockMapper extends Mapper<LongWritable, Text, Text, Text> {
 			Text nodeTypeVal = new Text(srcNodeVal);
 			context.write(srcNodeKey, nodeTypeVal);
 			
-			// create BE type output: 1_srcNodeID_dstNodeID, where both srcNode and dstNode are in srcNodeBlock
 			if(srcBlockID == dstBlockID){
+				// create BE type output: 1_srcNodeID_dstNodeID, where both srcNode and dstNode are in srcNodeBlock
 				String blockEdge = "" + Ref.typBE +"_"+ parts[0] +"_"+ parts[1];
 				Text BETypeVal = new Text(blockEdge);
 				context.write(srcNodeKey, BETypeVal);
 			}else{			
-			// create BC type output: 2_srcNodeID_dstNodeID_R, where R = PR(srcNode)/Degree(srcNode)
-			// note that nodes in special case where dstNodeID = -1 will go as BC type
-				String boundaryCondition = "" + Ref.typBC +"_"+ parts[0] +"_"+ parts[1] +"_"+ pageRank.toString() +"_"+ degree.toString();
-				Text BCTypeVal = new Text(boundaryCondition);
-				context.write(dstNodeKey, BCTypeVal);
+			// create BC type output: 2_srcNodeID_dstNodeID_PR_Deg_I/O, where I=1 means input BC, O=0 means output BC
+				// input type BC
+				String inputBC= "" + Ref.typBC +"_"+ parts[0] +"_"+ parts[1] +"_"+ pageRank.toString() +"_"+ degree.toString() +"_1";
+				Text inBCTypeVal = new Text(inputBC);
+				context.write(dstNodeKey, inBCTypeVal);
+				// output type BC
+				String outputBC= "" + Ref.typBC +"_"+ parts[0] +"_"+ parts[1] +"_"+ pageRank.toString() +"_"+ degree.toString() +"_0";
+				Text outBCTypeVal = new Text(outputBC);
+				context.write(srcNodeKey, outBCTypeVal);
 			}
 		}
-		
-		
-		
 	}
 
 }

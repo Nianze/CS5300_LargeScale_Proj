@@ -19,6 +19,10 @@ public class Node {
 		this.Degree = Integer.parseInt(parts[2]);
 	}
 	
+	public Node newPRNode(float pr){
+		return new Node(this.ID, pr, this.Degree);
+	}
+	
 	@Override
 	public String toString()
 	{

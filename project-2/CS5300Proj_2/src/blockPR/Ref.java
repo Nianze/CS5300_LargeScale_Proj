@@ -5,12 +5,12 @@ public class Ref {
  * there are three types of output to save in each pass:
  * 1. Node type: 0_nodeID_PR_Degree
  * 2. BE type: 1_srcNodeID_dstNodeID
- * 3. BC type: 2_srcNodeID_dstNodeID_PR_Deg, where PR = PR(src), Deg = Degree(src)
+ * 3. BC type: 2_srcNodeID_dstNodeID_PR_Deg_I/O, where PR = PR(src), Deg = Degree(src), I:in,O:out
  */
 	public static int PASS_NUM = 0;
 	
 	public static final int NUM_NODES = 685230;	
-	public static final int NUM_BLOCK = 68;
+//	public static final int NUM_BLOCK = 68;
 	public static final float INITIAL_PR = (1.0f/NUM_NODES);
 	public static final float DAMPING_FACTOR = 0.85f;
 	public static final float THRESHOLD = 0.001f;
@@ -18,6 +18,8 @@ public class Ref {
 	public static final int typNode = 0; //code for type of node
 	public static final int typBE = 1; // code for type of block edges
 	public static final int typBC = 2; // code for type of boundary conditions
+	public static final int typBC_InBlock = 1; // code for input edge of BC type
+	public static final int typBC_outBlock = 0; // code for output edge of BC type
 		
 	public static final int[] BLOCK_BOUNDARY = {
 			 0,    10328, 20373, 30629, 40645,
@@ -31,6 +33,15 @@ public class Ref {
             616148, 626448, 636240, 646022, 655804, 665666, 675448, 685230 };
 	
 	public static int blockIDofNode(int nodeID){
+//		switch(nodeID){
+//		case 0: return 0;
+//		case 1: return 1;
+//		case 2: return 1;
+//		case 3: return 1;
+//		case 4: return 0;
+//		case 5: return 0;
+//		default: return -1;
+//		}
 		int guess = nodeID / 10000;
 		if(nodeID < BLOCK_BOUNDARY[guess]) return guess - 1;		
 		else if(nodeID >= BLOCK_BOUNDARY[guess+1]) return guess+1;
@@ -38,11 +49,11 @@ public class Ref {
 		return guess;
 	}
 	
-	public Ref(){
+	public static void initPassNum(){
 		PASS_NUM = 0;
 	}
 	
-	public void incPassNum(){
+	public static void incPassNum(){
 		PASS_NUM ++;
 	}
 	

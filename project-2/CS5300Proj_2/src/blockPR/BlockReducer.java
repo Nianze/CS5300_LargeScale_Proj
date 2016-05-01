@@ -3,7 +3,6 @@ package blockPR;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -12,20 +11,6 @@ import blockPR.Ref;
 import blockPR.PRCounter;
 
 public class BlockReducer extends Reducer<Text, Text, Text, Text> {
-	
-	public class Triplet<X, Y, Z> {
-		public final X x; 
-		public final Y y;
-		public final Z z;
-		public Triplet(X x, Y y, Z z){
-		    this.x = x; 
-		    this.y = y;
-		    this.z = z;
-		}
-		public X first(){return this.x;}
-		public Y second(){return this.y;}
-		public Z third(){return this.z;}
-	}
 	
 	public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 		int count = Ref.PASS_NUM;
@@ -72,17 +57,19 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
 		}
 		
 		if(count > 0){
-			//int blockID = Integer.parseInt(key.toString());
+			System.out.println("current block id: " + key.toString());
+
 			// produce in-memory structures
 			HashMap<Integer,Node> nodeSet = new HashMap<Integer,Node>();
 			HashMap<Integer,Float> initNodePR = new HashMap<Integer,Float>(); 
 			HashMap<Integer,ArrayList<Integer>> BE = new HashMap<Integer, ArrayList<Integer>>(); // key: dstNodeID, value:srcNodeID
-			HashMap<Integer, ArrayList<Triplet<Integer,Float,Integer>>> BC = new HashMap<Integer, ArrayList<Triplet<Integer,Float,Integer>>>(); // key: dstNodeID, value: <srcNodeID,Degree,PR>
+			HashMap<Integer, ArrayList<String>> inputBC = new HashMap<Integer, ArrayList<String>>(); // key: dstNodeID, value: <srcNodeID,Degree,PR>
+			HashMap<Integer, ArrayList<String>> outputBC = new HashMap<Integer, ArrayList<String>>(); // key: srcNodeID, value: <dstNodeID,Degree,PR>
 			
 	   		while (values.iterator().hasNext()){
 	   			Text value = values.iterator().next();
-    			String line = value.toString().trim();
-    			String[] parts = line.split("\\s+");
+    			String line = value.toString().trim();    			
+    			String[] parts = line.split("_");
     			int lineType = Integer.parseInt(parts[0]);
     			int srcNodeID = Integer.parseInt(parts[1]);
     			int dstNodeID = 0;
@@ -92,6 +79,7 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
     				Node node = new Node(parts[1]+" "+parts[2]+" "+parts[3]);
     				nodeSet.put(srcNodeID, node);
     				initNodePR.put(srcNodeID, Float.parseFloat(parts[2]));
+//    				System.out.println("<node> "+ node.toString());
     				break;
     			case Ref.typBE:    				
     				dstNodeID = Integer.parseInt(parts[2]);
@@ -99,30 +87,47 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
     				if(list == null) list = new ArrayList<Integer>();
     				list.add(srcNodeID);
     				BE.put(dstNodeID, list);
+//    				System.out.println("<BE> key:"+dstNodeID+" val:"+srcNodeID);
     				break;
     			case Ref.typBC:    				
     				dstNodeID = Integer.parseInt(parts[2]);
     				float PR = Float.parseFloat(parts[3]);
     				int deg = Integer.parseInt(parts[4]);
-    				Triplet<Integer,Float,Integer> outEdge = new Triplet<Integer,Float,Integer>(srcNodeID, PR, deg);
-    				ArrayList<Triplet<Integer,Float,Integer>> _list = BC.get(dstNodeID);
-    				if(_list == null) _list = new ArrayList<Triplet<Integer,Float,Integer>>();
-    				_list.add(outEdge);
-    				BC.put(dstNodeID, _list);
-    				break;
+    				int typ = Integer.parseInt(parts[5]);
+    				switch(typ){
+    				case Ref.typBC_InBlock:
+    					String EdgeIn = new String(""+srcNodeID +"_"+ PR +"_"+ deg);
+        				ArrayList<String> _list = inputBC.get(dstNodeID);
+        				if(_list == null) _list = new ArrayList<String>();
+        				_list.add(EdgeIn);
+        				inputBC.put(dstNodeID, _list);
+//        				System.out.println("<inputBC> key:"+dstNodeID+" val:"+EdgeIn.toString());
+    					break;
+    				case Ref.typBC_outBlock:
+    					String EdgeOut = new String(""+dstNodeID +"_"+ PR +"_"+ deg);
+    					ArrayList<String> _list_ = outputBC.get(srcNodeID);
+        				if(_list_ == null) _list_ = new ArrayList<String>();
+        				_list_.add(EdgeOut);
+        				outputBC.put(srcNodeID, _list_);
+//        				System.out.println("<outputBC> key:"+srcNodeID+" val:"+EdgeOut.toString());
+    					break;
+    				}
     			}
     		}
-			
 			// iterate inside block
-			while(IterateBlockOnce(nodeSet, BE, BC) > Ref.THRESHOLD){}
-	   		
+			while(IterateBlockOnce(nodeSet, BE, inputBC) > Ref.THRESHOLD){}
+			
 			// figure out the overall residual in one block
 			Float blockRes = 0.0f;
 			for(int nid : initNodePR.keySet()){
 				float oldVal = initNodePR.get(nid);
 				float newVal = nodeSet.get(nid).PR;
 				blockRes += Math.abs(oldVal-newVal)/newVal;
+//				System.out.println("node: " + nid +" oldVal:"+oldVal);
+//				System.out.println("node: " + nid +" newVal:"+newVal);
 			}
+			System.out.println("block " + key.toString() +" Res Val:"+blockRes);
+	   		System.out.println("----------------");
 	   		
 			// report to Counter
 			blockRes *= 1000000;
@@ -130,23 +135,58 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
 	   		
 			// create output
 	   		for(int dstNID : BE.keySet()){
-	   			
-	   		}			
-	   		for(int dstNID : BC.keySet()){
-	   			Node node = nodeSet.get(dstNID);
-//	   			int dstNodeID = 
-//	   			Edge edge = new Edge();
+	   			for(int srcNID : BE.get(dstNID)){
+	   				Node srcNode = nodeSet.get(srcNID);
+	   				Edge edgeInfo = new Edge(srcNID, dstNID, srcNode.PR, srcNode.Degree);
+	   				Text text = new Text(edgeInfo.toString());
+	   				context.write(null, text);
+	   			}
 	   		}
-
+	   		for(int srcNID : outputBC.keySet()){
+	   			for(String bcEdge : outputBC.get(srcNID)){
+	   				String[] parts = bcEdge.split("_");
+	   				int dstNID = Integer.parseInt(parts[0]);
+	   				Node srcNode = nodeSet.get(srcNID);
+	   				float srcPR = srcNode.PR;
+	   				int srcDegree = srcNode.Degree;
+	   				Edge edgeInfo = new Edge(srcNID,dstNID,srcPR,srcDegree);
+	   				Text text = new Text(edgeInfo.toString());
+	   				context.write(null, text);
+	   			}
+	   		}
 		}
 		
 	}
 	
 	private float IterateBlockOnce(HashMap<Integer,Node> nodeSet,
-			HashMap<Integer,ArrayList<Integer>> BE, HashMap<Integer, 
-			ArrayList<Triplet<Integer,Float,Integer>>> BC){
-		
-		return 0.0f;
+								   HashMap<Integer,ArrayList<Integer>> BE, 
+								   HashMap<Integer,ArrayList<String>> BC){
+		float iterateRes = 0.0f;
+		for(int dstNID : nodeSet.keySet()){
+			float nextPR = 0.0f;
+			if(BE.get(dstNID) != null){
+				for(int srcNID : BE.get(dstNID)){
+					Node srcNode = nodeSet.get(srcNID);
+					nextPR += srcNode.PR / srcNode.Degree;
+				}
+			}
+			if(BC.get(dstNID) != null){
+				for(String bcEdge : BC.get(dstNID)){
+	   				String[] parts = bcEdge.split("_");
+	   				float srcPR = Float.parseFloat(parts[1]);
+	   				int srcDegree = Integer.parseInt(parts[2]);
+					nextPR += srcPR / srcDegree;
+				}
+			}
+			nextPR = ((1-Ref.DAMPING_FACTOR)/Ref.NUM_NODES) + Ref.DAMPING_FACTOR*nextPR;
+			float oldPR = nodeSet.get(dstNID).PR;
+			iterateRes += Math.abs(nextPR - oldPR) / nextPR;
+			//update next PR to destination node
+			Node nextNode = nodeSet.get(dstNID).newPRNode(nextPR);
+			nodeSet.put(dstNID, nextNode);
+		}
+		System.out.println("temp res for one iteration: "+iterateRes);
+		return iterateRes;		
 	}
 
 }

@@ -198,7 +198,7 @@ public class SimplePageRank
 			
 			// setup reading input file resources
 			String line = "";
-			BufferedReader br = new BufferedReader(new FileReader("/home/nanandy/Desktop/CS5300/edges.txt"));
+			BufferedReader br = new BufferedReader(new FileReader("/home/parallels/Desktop/CS5300/edges.txt"));
 			while((line = br.readLine()) != null)
 			{
 				String newLine = line.trim();
@@ -263,7 +263,7 @@ public class SimplePageRank
 		double fromNetID = 0.539;
 		double rejectMin = 0.9 * fromNetID;
 		double rejectLimit = rejectMin + 0.01;
-		return ( ((x >= rejectMin) || (x < rejectLimit)) ? false : true );
+		return ( ((x >= rejectMin) && (x < rejectLimit)) ? false : true );
 	}
 
 }
