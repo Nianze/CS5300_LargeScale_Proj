@@ -1,4 +1,4 @@
-package blockPR;
+package randomBlockPR;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,8 +7,8 @@ import java.util.HashMap;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import blockPR.Ref;
-import blockPR.PRCounter;
+import randomBlockPR.Ref;
+import randomBlockPR.PRCounter;
 
 public class BlockReducer extends Reducer<Text, Text, Text, Text> {
 	
@@ -115,7 +115,7 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
     		}
 			// iterate inside block
 	   		int iterNum = 1;
-			while(IterateBlockOnce(nodeSet, BE, inputBC, initNodePR) > Ref.THRESHOLD){iterNum++;}
+			while(IterateBlockOnce(nodeSet, BE, inputBC) > Ref.THRESHOLD){iterNum++;}
 			Ref.incBlockIterNum(blockID,iterNum);
 			
 			// keep track of lowest 2 nodes' PR
@@ -172,16 +172,14 @@ public class BlockReducer extends Reducer<Text, Text, Text, Text> {
 	
 	private float IterateBlockOnce(HashMap<Integer,Node> nodeSet,
 								   HashMap<Integer,ArrayList<Integer>> BE, 
-								   HashMap<Integer,ArrayList<String>> BC,
-								   HashMap<Integer,Float> initNodeSet){
+								   HashMap<Integer,ArrayList<String>> BC){
 		float iterateRes = 0.0f;
 		for(int dstNID : nodeSet.keySet()){
 			float nextPR = 0.0f;
 			if(BE.get(dstNID) != null){
 				for(int srcNID : BE.get(dstNID)){
-					float srcPR = initNodeSet.get(srcNID);
 					Node srcNode = nodeSet.get(srcNID);
-					nextPR += srcPR / srcNode.Degree;
+					nextPR += srcNode.PR / srcNode.Degree;
 				}
 			}
 			if(BC.get(dstNID) != null){

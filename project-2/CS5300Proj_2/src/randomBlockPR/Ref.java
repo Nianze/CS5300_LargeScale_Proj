@@ -1,4 +1,4 @@
-package blockPR;
+package randomBlockPR;
 
 public class Ref {
 /**
@@ -43,9 +43,8 @@ public class Ref {
             616148, 626448, 636240, 646022, 655804, 665666, 675448, 685230 };
 	
 	public static int blockIDofNode(int nodeID){
-		if(nodeID < 0) return -1; // for dummy node case where nodeID = -1
-		int guess = nodeID / 10000;
-		if(nodeID < BLOCK_BOUNDARY[guess]) return guess - 1;				
+		Integer id = new Integer(nodeID);
+		int guess = id.hashCode() % 68;
 		return guess;
 	}
 	

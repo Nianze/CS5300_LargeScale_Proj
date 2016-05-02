@@ -1,4 +1,4 @@
-package blockPR;
+package gsBlockPR;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -12,8 +12,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import blockPR.BlockMapper;
-import blockPR.BlockReducer;
+import gsBlockPR.BlockMapper;
+import gsBlockPR.BlockReducer;
 
 public class Driver {
 

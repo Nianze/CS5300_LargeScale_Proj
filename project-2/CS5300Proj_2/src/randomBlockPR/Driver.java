@@ -1,4 +1,4 @@
-package blockPR;
+package randomBlockPR;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -12,8 +12,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import blockPR.BlockMapper;
-import blockPR.BlockReducer;
+import randomBlockPR.BlockMapper;
+import randomBlockPR.BlockReducer;
 
 public class Driver {
 
@@ -30,7 +30,7 @@ public class Driver {
 		Float average_residual_error = 1.0f;
 		Ref.initPassNum();
 		
-		while(average_residual_error > Ref.THRESHOLD && Ref.PASS_NUM < 10){
+		while(average_residual_error > Ref.THRESHOLD && Ref.PASS_NUM < 9){
 			Configuration conf = new Configuration();
 			Job job = Job.getInstance(conf, "BlockPageRank");
 			job.setJarByClass(blockPR.Driver.class);
